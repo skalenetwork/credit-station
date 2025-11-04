@@ -1,2 +1,3 @@
-# -redit-station
+# Credit-station
+
 Receives payments
