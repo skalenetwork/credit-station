@@ -1,6 +1,7 @@
 {
   "packageManager": "yarn@4.10.3",
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
     "@nomicfoundation/hardhat-ethers": "^4.0.2",
     "@nomicfoundation/hardhat-ethers-chai-matchers": "^3.0.0",
     "@nomicfoundation/hardhat-ignition": "^3.0.0",
@@ -12,16 +13,36 @@
     "@nomicfoundation/hardhat-typechain": "^3.0.0",
     "@nomicfoundation/hardhat-verify": "^3.0.4",
     "@nomicfoundation/ignition-core": "^3.0.0",
+    "@typechain/ethers-v6": "^0.5.1",
     "@types/chai": "^4.2.0",
     "@types/chai-as-promised": "^8.0.1",
     "@types/mocha": ">=10.0.10",
     "@types/node": "^22.8.5",
     "chai": "^5.1.2",
+    "cspell": "^9.2.2",
+    "eslint": "^9.39.1",
     "ethers": "^6.14.0",
     "forge-std": "foundry-rs/forge-std#v1.9.4",
+    "globals": "^16.5.0",
     "hardhat": "^3.0.11",
     "mocha": "^11.0.0",
-    "typescript": "~5.8.0"
+    "solhint": "^6.0.1",
+    "typechain": "^8.3.2",
+    "typescript": "~5.8.0",
+    "typescript-eslint": "^8.46.3"
+  },
+  "scripts": {
+    "compile": "yarn hardhat compile",
+    "cleanCompile": "yarn hardhat clean && yarn compile",
+    "cspell": "yarn exec cspell .",
+    "eslint": "yarn exec eslint .",
+    "fullCheck": "yarn compile && yarn lint && yarn tsc && yarn eslint",
+    "hooks": "git config core.hooksPath .githooks",
+    "lint": "yarn solhint 'contracts/**/*.sol'",
+    "no-hooks": "git config core.hooksPath .git/hooks",
+    "slither": "yarn cleanCompile && slither . --compile-force-framework hardhat --ignore-compile",
+    "test": "yarn tsc && yarn hardhat test",
+    "tsc": "yarn exec tsc --noEmit"
   },
   "type": "module"
 }

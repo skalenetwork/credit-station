@@ -21,6 +21,10 @@
 
 pragma solidity ^0.8.30;
 
+/// @title Credit Station
+/// @author Dmytro Stebaiev
+/// @notice This contract is responsible for receiving payments for credits.
 contract CreditStation {
-
+    /// @notice Placeholder while there is no implementation
+    int256 public price;
 }
