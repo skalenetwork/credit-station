@@ -43,7 +43,7 @@ contract Ledger is AccessManaged, ILedger {
     constructor(address managerAddress)
         AccessManaged(managerAddress)
     {
-        creditsNumber = Credit.wrap(10 ether);
+        creditsNumber = Credit.wrap(20000 ether);
     }
 
     /// @notice Send credits to the purchaser

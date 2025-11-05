@@ -40,6 +40,20 @@ interface ICreditStation {
         address purchaser,
         IERC20 token
     ) external;
+    /// @notice Sets the receiver address
+    /// @param newReceiver The new receiver address
+    function setReceiver(address newReceiver) external;
+    /// @notice Gets price of credits batch in a specific token
+    /// @param token The address of the token
+    /// @return price The price of the credits batch in the specified token
+    function getPrice(IERC20 token) external view returns (uint256 price);
+    /// @notice Gets all supported tokens for payment
+    /// @return tokens The list of supported tokens addresses
+    function getSupportedTokens() external view returns (IERC20[] memory tokens);
+    /// @notice Checks if a token is accepted for payment
+    /// @param token The address of the token
+    /// @return accepted True if the token is accepted, false otherwise
+    function isTokenAccepted(IERC20 token) external view returns (bool accepted);
     /// @notice Converts schain name to schain hash
     /// @param schainName The name of the schain
     /// @return schainHash The hash of the schain name

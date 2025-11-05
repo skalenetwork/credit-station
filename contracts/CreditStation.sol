@@ -43,7 +43,6 @@ contract CreditStation is AccessManaged, ICreditStation {
     /// @notice Address that receives the payments for credits
     address public receiver;
     PaymentId private _nextPaymentId = PaymentId.wrap(1);
-    EnumerableSet.UintSet private _pendingPayments;
     EnumerableMap.AddressToUintMap private _prices;
 
     /// @notice Emitted when a payment is received
@@ -53,12 +52,17 @@ contract CreditStation is AccessManaged, ICreditStation {
     /// @param to The address of the credits receiver
     /// @param tokenAddress The address of the token used for payment
     event PaymentReceived(
-        PaymentId id,
-        SchainHash schainHash,
-        address from,
+        PaymentId indexed id,
+        SchainHash indexed schainHash,
+        address indexed from,
         address to,
         IERC20 tokenAddress
     );
+
+    /// @notice Emitted when the receiver address is changed
+    /// @param oldReceiver The old receiver address
+    /// @param newReceiver The new receiver address
+    event ReceiverWasChanged(address indexed oldReceiver, address indexed newReceiver);
 
     error TokenIsNotAccepted(IERC20 token);
     error TokenTransferFailed(IERC20 token, address from, uint256 amount);
@@ -97,6 +101,42 @@ contract CreditStation is AccessManaged, ICreditStation {
             to: purchaser,
             tokenAddress: token
         });
+    }
+
+    /// @notice Sets the receiver address
+    /// @param newReceiver The new receiver address
+    function setReceiver(address newReceiver) external override restricted {
+        emit ReceiverWasChanged(receiver, newReceiver);
+        receiver = newReceiver;
+    }
+
+    // External view
+
+    /// @notice Gets price of credits batch in a specific token
+    /// @param token The address of the token
+    /// @return price The price of the credits batch in the specified token
+    function getPrice(IERC20 token) external view override returns (uint256 price) {
+        (bool accepted, uint256 price_) = _prices.tryGet(address(token));
+        require(accepted, TokenIsNotAccepted(token));
+        return price_;
+    }
+
+    /// @notice Gets all supported tokens for payment
+    /// @return tokens The list of supported tokens addresses
+    function getSupportedTokens() external view override returns (IERC20[] memory tokens) {
+        uint256 length = _prices.length();
+        tokens = new IERC20[](length);
+        for (uint256 i = 0; i < length; ++i) {
+            (address tokenAddress, ) = _prices.at(i);
+            tokens[i] = IERC20(tokenAddress);
+        }
+    }
+
+    /// @notice Checks if a token is accepted for payment
+    /// @param token The address of the token
+    /// @return accepted True if the token is accepted, false otherwise
+    function isTokenAccepted(IERC20 token) external view override returns (bool accepted) {
+        return _prices.contains(address(token));
     }
 
     // Public
