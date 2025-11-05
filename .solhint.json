@@ -1,7 +1,8 @@
 {
   "extends": "solhint:all",
   "rules": {
-    "foundry-test-functions": "error",
+    "foundry-test-functions": "off",
+
     "not-rely-on-time": "error",
     "duplicated-imports": "error",
     "comprehensive-interface": "error",
@@ -14,6 +15,7 @@
     "imports-order": "error",
     "immutable-vars-naming": "error",
     "func-named-parameters": "error",
+    "func-visibility": ["error", { "ignoreConstructors": true }],
     "gas-indexed-events": "error",
     "gas-named-return-values": "error",
     "max-line-length": "error",
@@ -24,6 +26,7 @@
     "no-unused-import": "error",
     "no-unused-vars": "error",
     "ordering": "error",
-    "use-natspec": "error"
+    "use-natspec": "error",
+    "reason-string": "error"
   }
 }

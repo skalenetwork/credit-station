@@ -44,5 +44,8 @@
     "test": "yarn tsc && yarn hardhat test",
     "tsc": "yarn exec tsc --noEmit"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@openzeppelin/contracts": "5.4.0"
+  }
 }
