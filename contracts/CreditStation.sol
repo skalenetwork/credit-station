@@ -30,6 +30,7 @@ import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableM
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import { ICreditStation, IERC20 } from "./interfaces/ICreditStation.sol";
+import { PaymentId, SchainHash } from "./interfaces/types.sol";
 
 
 /// @title Credit Station
@@ -75,7 +76,7 @@ contract CreditStation is AccessManaged, ICreditStation {
     /// @param schainName The name of the schain
     /// @param purchaser The address purchased credits will be sent to
     /// @param token The address of the token to pay with
-    function pay(
+    function buy(
         string calldata schainName,
         address purchaser,
         IERC20 token
