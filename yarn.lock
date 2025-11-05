@@ -1402,7 +1402,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/hardhat-network-helpers@npm:^3.0.1":
+"@nomicfoundation/hardhat-network-helpers@npm:^3.0.2":
   version: 3.0.2
   resolution: "@nomicfoundation/hardhat-network-helpers@npm:3.0.2"
   dependencies:
@@ -4692,7 +4692,7 @@ __metadata:
     "@nomicfoundation/hardhat-ignition-ethers": "npm:^3.0.0"
     "@nomicfoundation/hardhat-keystore": "npm:^3.0.2"
     "@nomicfoundation/hardhat-mocha": "npm:^3.0.5"
-    "@nomicfoundation/hardhat-network-helpers": "npm:^3.0.1"
+    "@nomicfoundation/hardhat-network-helpers": "npm:^3.0.2"
     "@nomicfoundation/hardhat-toolbox-mocha-ethers": "npm:^3.0.1"
     "@nomicfoundation/hardhat-typechain": "npm:^3.0.0"
     "@nomicfoundation/hardhat-verify": "npm:^3.0.4"

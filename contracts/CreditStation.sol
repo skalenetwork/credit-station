@@ -101,6 +101,18 @@ contract CreditStation is AccessManaged, ICreditStation {
         });
     }
 
+    /// @notice Sets price of credits batch in a specific token
+    /// @notice Setting price to 0 removes the token from accepted tokens list
+    /// @param token The address of the token
+    /// @param price The price of the credits batch in the specified token
+    function setPrice(IERC20 token, uint256 price) external override restricted {
+        if (price == 0) {
+            _prices.remove(address(token));
+        } else {
+            _prices.set(address(token), price);
+        }
+    }
+
     /// @notice Sets the receiver address
     /// @param newReceiver The new receiver address
     function setReceiver(address newReceiver) external override restricted {
