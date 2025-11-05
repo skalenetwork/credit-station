@@ -8,14 +8,14 @@ const { ethers, networkHelpers } = await network.connect();
 
 const deployMainnetFixture = async () => {
     const [owner, receiver] = await ethers.getSigners();
-    const contracts = await deployMainnet(owner, receiver);
+    const contracts = await deployMainnet(owner, receiver, "test");
     const token = await ethers.deployContract("Token", ["Test Token", "TTK"]);
     return { ...contracts, token };
 }
 
 const deploySchainFixture = async () => {
     const [owner] = await ethers.getSigners();
-    const contracts = await deploySchain(owner);
+    const contracts = await deploySchain(owner, "test");
     return contracts;
 }
 

@@ -4,13 +4,14 @@ import chalk from "chalk";
 import { AddressLike } from "ethers";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
+import { getVersion } from "../scripts/upgrade-tools-stub/version.js";
 const { ethers } = await network.connect();
 
 const OWNER_PARAMETER = "OWNER";
 
-export const deploySchain = async (owner: AddressLike) => {
+export const deploySchain = async (owner: AddressLike, version: string) => {
     const accessManager = await deployAccessManager(owner);
-    const ledger = await deployLedger(accessManager);
+    const ledger = await deployLedger(accessManager, version);
     return {
         accessManager,
         ledger
@@ -26,7 +27,7 @@ const main = async () => {
         console.log(chalk.yellow(`Using deployer address: ${owner}`));
     }
 
-    const { accessManager, ledger } = await deploySchain(owner);
+    const { accessManager, ledger } = await deploySchain(owner, await getVersion());
 
     console.log(chalk.gray("Storing addresses"));
     await storeAddresses(

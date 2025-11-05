@@ -28,15 +28,19 @@ import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import { ILedger } from "./interfaces/ILedger.sol";
+import { IVersioned } from "./interfaces/IVersioned.sol";
 import { PaymentId } from "./interfaces/types.sol";
 
 
 /// @title Ledger contracts conducts credit fulfillment and stores history
 /// @author Dmytro Stebaiev
 /// @notice This contract is responsible for sending credits to purchasers
-contract Ledger is AccessManaged, ILedger {
+contract Ledger is AccessManaged, IVersioned, ILedger {
     using EnumerableSet for EnumerableSet.UintSet;
     using Address for address payable;
+
+    /// @notice The version of the contract
+    string public override version;
 
     EnumerableSet.UintSet private _fulfilledPayments;
 
@@ -65,6 +69,13 @@ contract Ledger is AccessManaged, ILedger {
         require(_fulfilledPayments.add(PaymentId.unwrap(payment)), PaymentIsAlreadyFulfilled(payment));
         emit PaymentFulfilled(payment, purchaser, msg.value);
         purchaser.sendValue(msg.value);
+    }
+
+    /// @notice Sets the version of the contract
+    /// @param newVersion The new version string
+    function setVersion(string calldata newVersion) external override restricted {
+        emit VersionChanged(version, newVersion);
+        version = newVersion;
     }
 
     // External view

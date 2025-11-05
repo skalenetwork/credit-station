@@ -29,15 +29,18 @@ import {
 import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
 import { ICreditStation, IERC20 } from "./interfaces/ICreditStation.sol";
+import { IVersioned } from "./interfaces/IVersioned.sol";
 import { PaymentId, SchainHash } from "./interfaces/types.sol";
 
 
 /// @title Credit Station
 /// @author Dmytro Stebaiev
 /// @notice This contract is responsible for receiving payments for credits.
-contract CreditStation is AccessManaged, ICreditStation {
+contract CreditStation is AccessManaged, IVersioned, ICreditStation {
     using EnumerableMap for EnumerableMap.AddressToUintMap;
 
+    /// @notice The version of the contract
+    string public override version;
     /// @notice Address that receives the payments for credits
     address public receiver;
     PaymentId private _nextPaymentId = PaymentId.wrap(1);
@@ -118,6 +121,13 @@ contract CreditStation is AccessManaged, ICreditStation {
     function setReceiver(address newReceiver) external override restricted {
         emit ReceiverWasChanged(receiver, newReceiver);
         receiver = newReceiver;
+    }
+
+    /// @notice Sets the version of the contract
+    /// @param newVersion The new version string
+    function setVersion(string calldata newVersion) external override restricted {
+        emit VersionChanged(version, newVersion);
+        version = newVersion;
     }
 
     // External view

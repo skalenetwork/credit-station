@@ -34,29 +34,37 @@ export const deployAccessManager = async (
 
 export const deployCreditStation = async (
     accessManager: CreditStationAccessManager,
-    receiver: AddressLike
+    receiver: AddressLike,
+    version: string
 ) => {
-    return await deployContract(
+    const creditStation = await deployContract(
         "CreditStation",
         [accessManager, receiver]
     ) as CreditStation;
+    const response = await creditStation.setVersion(version);
+    await response.wait();
+    return creditStation;
 }
 
 export const deployLedger = async (
-    accessManager: CreditStationAccessManager
+    accessManager: CreditStationAccessManager,
+    version: string
 ) => {
     const ledger = await deployContract(
         "Ledger",
         [accessManager]
     ) as Ledger;
 
-    const response = await accessManager.setTargetFunctionRole(
+    let response = await accessManager.setTargetFunctionRole(
         await ethers.resolveAddress(ledger),
         [
             ledger.interface.getFunction("fulfill").selector
         ],
         await accessManager.FULFILL_AGENT_ROLE()
     );
+    await response.wait();
+
+    response = await ledger.setVersion(version);
     await response.wait();
 
     return ledger;
