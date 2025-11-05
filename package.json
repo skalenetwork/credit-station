@@ -46,6 +46,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@openzeppelin/contracts": "5.4.0"
+    "@openzeppelin/contracts": "5.4.0",
+    "chalk": "^5.6.2"
   }
 }
