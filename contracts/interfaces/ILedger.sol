@@ -21,10 +21,18 @@
 
 pragma solidity ^0.8.30;
 
+import { PaymentId } from "./types.sol";
+
 /// @title Ledger Interface
 /// @author Dmytro Stebaiev
 /// @notice Interface of the Ledger contract
 interface ILedger {
     /// @notice Send credits to the purchaser
-    function fulfill() external;
+    /// @param payment The payment ID
+    /// @param purchaser The address of the purchaser
+    function fulfill(PaymentId payment, address payable purchaser) external payable;
+    /// @notice Checks if a payment is fulfilled
+    /// @param payment The payment ID
+    /// @return fulfilled True if the payment is fulfilled, false otherwise
+    function isFulfilled(PaymentId payment) external view returns (bool fulfilled);
 }

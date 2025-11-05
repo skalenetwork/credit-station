@@ -1,3 +1,5 @@
 export const contracts = [
-    "CreditStation"
-]
+    "CreditStation",
+    "CreditStationAccessManager",
+    "Ledger"
+];

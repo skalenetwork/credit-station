@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
- *   types.sol - credit-station
+ *   error.sol - credit-station
  *   Copyright (C) 2025-Present SKALE Labs
  *   @author Dmytro Stebaiev
  *
@@ -21,5 +21,4 @@
 
 pragma solidity ^0.8.30;
 
-type PaymentId is uint256;
-type SchainHash is bytes32;
+error AddressIsNotSet();

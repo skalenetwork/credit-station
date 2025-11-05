@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
- *   types.sol - credit-station
+ *   CreditStationAccessManager.sol - credit-station
  *   Copyright (C) 2025-Present SKALE Labs
  *   @author Dmytro Stebaiev
  *
@@ -21,5 +21,22 @@
 
 pragma solidity ^0.8.30;
 
-type PaymentId is uint256;
-type SchainHash is bytes32;
+import {
+    AccessManager
+} from "@openzeppelin/contracts/access/manager/AccessManager.sol";
+import { AddressIsNotSet } from "./interfaces/error.sol";
+
+
+/// @title CreditStationAccessManager
+/// @author Dmytro Stebaiev
+/// @notice Access Manager for Credit Station contracts
+contract CreditStationAccessManager is AccessManager {
+    /// @notice Role allowed to fulfill payments
+    uint64 public constant FULFILL_AGENT_ROLE = 1;
+
+    /// @notice Constructor
+    /// @param owner The address of the owner
+    constructor(address owner) AccessManager(owner) {
+        require(owner != address(0), AddressIsNotSet());
+    }
+}

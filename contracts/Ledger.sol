@@ -24,30 +24,55 @@ pragma solidity ^0.8.30;
 import {
     AccessManaged
 } from "@openzeppelin/contracts/access/manager/AccessManaged.sol";
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import { ILedger } from "./interfaces/ILedger.sol";
-import { Credit } from "./interfaces/types.sol";
+import { PaymentId } from "./interfaces/types.sol";
 
 
 /// @title Ledger contracts conducts credit fulfillment and stores history
 /// @author Dmytro Stebaiev
 /// @notice This contract is responsible for sending credits to purchasers
 contract Ledger is AccessManaged, ILedger {
-    /// @notice Number of credits to send to the purchaser
-    Credit public creditsNumber;
+    using EnumerableSet for EnumerableSet.UintSet;
+    using Address for address payable;
 
-    error NotImplemented();
+    EnumerableSet.UintSet private _fulfilledPayments;
+
+    /// @notice Emitted when a payment is fulfilled
+    /// @param payment The payment ID
+    /// @param purchaser The address of the purchaser
+    /// @param amount The amount sent
+    event PaymentFulfilled(PaymentId payment, address purchaser, uint256 amount);
+
+    error PaymentIsAlreadyFulfilled(PaymentId payment);
 
     /// @notice Constructor
     /// @param managerAddress The address of the Access Manager contract
     constructor(address managerAddress)
         AccessManaged(managerAddress)
     {
-        creditsNumber = Credit.wrap(20000 ether);
+        assert(_fulfilledPayments.length() == 0);
     }
 
+    // External
+
     /// @notice Send credits to the purchaser
-    function fulfill() external override {
-        revert NotImplemented();
+    /// @param payment The payment ID
+    /// @param purchaser The address purchased credits will be sent to
+    function fulfill(PaymentId payment, address payable purchaser) external payable restricted override {
+        require(_fulfilledPayments.add(PaymentId.unwrap(payment)), PaymentIsAlreadyFulfilled(payment));
+        emit PaymentFulfilled(payment, purchaser, msg.value);
+        purchaser.sendValue(msg.value);
+    }
+
+    // External view
+
+    /// @notice Checks if a payment has been fulfilled
+    /// @param payment The payment ID
+    /// @return fulfilled True if the payment has been fulfilled, false otherwise
+    function isFulfilled(PaymentId payment) external view override returns (bool fulfilled) {
+        return _fulfilledPayments.contains(PaymentId.unwrap(payment));
     }
 }

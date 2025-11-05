@@ -27,7 +27,6 @@ import {
     AccessManaged
 } from "@openzeppelin/contracts/access/manager/AccessManaged.sol";
 import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import { ICreditStation, IERC20 } from "./interfaces/ICreditStation.sol";
 import { PaymentId, SchainHash } from "./interfaces/types.sol";
@@ -37,7 +36,6 @@ import { PaymentId, SchainHash } from "./interfaces/types.sol";
 /// @author Dmytro Stebaiev
 /// @notice This contract is responsible for receiving payments for credits.
 contract CreditStation is AccessManaged, ICreditStation {
-    using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableMap for EnumerableMap.AddressToUintMap;
 
     /// @notice Address that receives the payments for credits
