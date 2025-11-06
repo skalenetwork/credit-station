@@ -65,7 +65,7 @@ jobs:
         commit: ${{ github.sha }}
         tag: ${{ env.VERSION }}
         prerelease: ${{ env.PRERELEASE }}
-        artifacts: "data/fair-manager-*-abi.json"
+        artifacts: "data/credit-station-*-abi.json"
 
   abi:
     runs-on: ubuntu-latest
