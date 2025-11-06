@@ -12,7 +12,7 @@
     "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.1",
     "@nomicfoundation/hardhat-typechain": "^3.0.0",
     "@nomicfoundation/hardhat-verify": "^3.0.4",
-    "@nomicfoundation/ignition-core": "^3.0.0",
+    "@nomicfoundation/ignition-core": "^3.0.5",
     "@typechain/ethers-v6": "^0.5.1",
     "@types/chai": "^4.2.0",
     "@types/chai-as-promised": "^8.0.1",
