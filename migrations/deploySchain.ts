@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { deployAccessManager, deployLedger, failureCode, storeAddresses, successCode } from "./deploy.js";
+import { deployAccessManager, deployLedger, failureCode, storeAddresses, successCode } from "./deploy";
 import chalk from "chalk";
 import { AddressLike } from "ethers";
 import { getVersion } from "@skalenetwork/upgrade-tools";

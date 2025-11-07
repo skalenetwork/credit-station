@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
-import { deployAccessManager, deployCreditStation, failureCode, storeAddresses, successCode } from "./deploy.js";
 import chalk from "chalk";
 import { AddressLike } from "ethers";
 import { getVersion } from "@skalenetwork/upgrade-tools";
+import { deployAccessManager, deployCreditStation, storeAddresses, successCode, failureCode } from "./deploy";
 
 const OWNER_PARAMETER = "OWNER";
 const RECEIVER_PARAMETER = "RECEIVER";
