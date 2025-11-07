@@ -19,7 +19,7 @@
     "forge-std": "foundry-rs/forge-std#v1.9.4",
     "globals": "^16.5.0",
     "hardhat": "^2.27.0",
-    "mocha": "^11.0.0",
+    "mocha": "^11.7.5",
     "solhint": "^6.0.1",
     "solidity-coverage": "^0.8.16",
     "ts-node": "^10.9.2",
