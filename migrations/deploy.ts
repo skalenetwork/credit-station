@@ -1,10 +1,9 @@
 import { AddressLike } from "ethers";
-import { network } from "hardhat";
-import { CreditStation, CreditStationAccessManager, Ledger } from "../types/ethers-contracts/index.js";
+import { ethers } from "hardhat";
+import { CreditStation, CreditStationAccessManager, Ledger } from "../typechain-types";
 import { promises as fs } from 'fs';
 import chalk from "chalk";
 
-const { ethers } = await network.connect();
 export const successCode = 0;
 export const failureCode = 1;
 

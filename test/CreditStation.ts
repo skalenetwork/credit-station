@@ -1,8 +1,7 @@
 import { cleanMainnetDeployment, mainnetWithAllowedToken } from "./tools/fixtures.js";
-import { network } from "hardhat";
+import { ethers } from "hardhat";
 import { should } from "chai";
 
-const { ethers } = await network.connect();
 should();
 
 describe("CreditStation", () => {
@@ -23,7 +22,6 @@ describe("CreditStation", () => {
         await token.connect(user).approve(creditStation, price);
         const buyTransaction = await creditStation.connect(user).buy(schain, user, token);
         await buyTransaction.should.changeTokenBalance(
-                ethers,
                 token,
                 await creditStation.receiver(),
                 price);
