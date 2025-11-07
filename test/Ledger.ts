@@ -1,4 +1,4 @@
-import { schainWithAgent } from "./tools/fixtures.js";
+import { schainWithAgent } from "./tools/fixtures";
 import { ethers } from "hardhat";
 import { should } from "chai";
 

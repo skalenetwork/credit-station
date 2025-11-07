@@ -5,6 +5,7 @@ import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-network-helpers";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@typechain/hardhat";
+import "solidity-coverage"
 
 dotenv.config();
 

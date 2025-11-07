@@ -21,6 +21,7 @@
     "hardhat": "^2.27.0",
     "mocha": "^11.0.0",
     "solhint": "^6.0.1",
+    "solidity-coverage": "^0.8.16",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
     "typescript": "~5.9.3",

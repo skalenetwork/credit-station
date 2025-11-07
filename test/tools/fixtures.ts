@@ -1,7 +1,7 @@
 
 import { ethers } from "hardhat";
-import { deployMainnet } from "../../migrations/deployMainnet.js";
-import { deploySchain } from "../../migrations/deploySchain.js";
+import { deployMainnet } from "../../migrations/deployMainnet";
+import { deploySchain } from "../../migrations/deploySchain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { Token } from "../../typechain-types";
 
@@ -21,7 +21,7 @@ const deploySchainFixture = async () => {
 }
 
 const allowToken = async () => {
-    const contracts = await deployMainnetFixture();
+    const contracts = await cleanMainnetDeployment();
     const { creditStation, token } = contracts;
     const price = ethers.parseEther("1");
     await creditStation.setPrice(token, price);
@@ -29,7 +29,7 @@ const allowToken = async () => {
 }
 
 const registerAgent = async () => {
-    const contracts = await deploySchainFixture();
+    const contracts = await cleanSchainDeployment();
     const { accessManager } = contracts;
     const [, agent] = await ethers.getSigners();
     await accessManager.grantRole(
