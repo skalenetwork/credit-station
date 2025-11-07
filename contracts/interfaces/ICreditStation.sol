@@ -54,7 +54,7 @@ interface ICreditStation {
     function getPrice(IERC20 token) external view returns (uint256 price);
     /// @notice Gets all supported tokens for payment
     /// @return tokens The list of supported tokens addresses
-    function getSupportedTokens() external view returns (IERC20[] memory tokens);
+    function getSupportedTokens() external view returns (address[] memory tokens);
     /// @notice Checks if a token is accepted for payment
     /// @param token The address of the token
     /// @return accepted True if the token is accepted, false otherwise

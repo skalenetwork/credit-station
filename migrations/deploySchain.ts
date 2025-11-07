@@ -1,11 +1,9 @@
-import { network } from "hardhat";
-import { deployAccessManager, deployLedger, failureCode, storeAddresses, successCode } from "./deploy.js";
+import { ethers } from "hardhat";
+import { deployAccessManager, deployLedger, failureCode, storeAddresses, successCode } from "./deploy";
 import chalk from "chalk";
 import { AddressLike } from "ethers";
-import { fileURLToPath } from "node:url";
-import { resolve } from "node:path";
-import { getVersion } from "../scripts/upgrade-tools-stub/version.js";
-const { ethers } = await network.connect();
+import { getVersion } from "@skalenetwork/upgrade-tools";
+
 
 const OWNER_PARAMETER = "OWNER";
 
@@ -38,14 +36,7 @@ const main = async () => {
     console.log("Done");
 }
 
-const currentFileAbsPath = fileURLToPath(import.meta.url);
-const runCommandIndex = process.argv.indexOf('run');
-let isRunAsMainScript = false;
-if (runCommandIndex !== -1 && process.argv.length > runCommandIndex + 1) {
-    const scriptArgAbsPath = resolve(process.argv[runCommandIndex + 1]);
-    isRunAsMainScript = (currentFileAbsPath === scriptArgAbsPath);
-}
-if (isRunAsMainScript) {
+if (require.main === module) {
     main()
         .then(() => process.exit(successCode))
         .catch(error => {

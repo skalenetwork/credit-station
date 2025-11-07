@@ -1,9 +1,7 @@
 import {promises as fs} from 'fs';
-import { contracts } from '../migrations/deploy.js';
-import { network } from "hardhat";
-import { getVersion } from './upgrade-tools-stub/version.js';
-import { getAbi } from './upgrade-tools-stub/abi.js';
-const { ethers } = await network.connect();
+import { contracts } from '../migrations/deploy';
+import { ethers } from "hardhat";
+import { getAbi, getVersion } from '@skalenetwork/upgrade-tools';
 
 type ABI = {[name: string]: []}
 
@@ -34,11 +32,13 @@ const main = async () => {
 }
 
 
-const successCode = 0;
-const failureCode = 1;
-main()
-    .then(() => process.exit(successCode))
-    .catch(error => {
-        console.error(error);
-        process.exit(failureCode);
-    });
+if (require.main === module) {
+    const successCode = 0;
+    const failureCode = 1;
+    main()
+        .then(() => process.exit(successCode))
+        .catch(error => {
+            console.error(error);
+            process.exit(failureCode);
+        });
+}

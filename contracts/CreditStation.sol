@@ -28,6 +28,7 @@ import {
 } from "@openzeppelin/contracts/access/manager/AccessManaged.sol";
 import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
+import { AddressIsNotSet } from "./interfaces/error.sol";
 import { ICreditStation, IERC20 } from "./interfaces/ICreditStation.sol";
 import { IVersioned } from "./interfaces/IVersioned.sol";
 import { PaymentId, SchainHash } from "./interfaces/types.sol";
@@ -60,6 +61,17 @@ contract CreditStation is AccessManaged, IVersioned, ICreditStation {
         IERC20 tokenAddress
     );
 
+    /// @notice Emitted when a token is allowed for payment
+    /// @param token The address of the allowed token
+    event TokenAllowed(IERC20 indexed token);
+    /// @notice Emitted when a token is disallowed for payment
+    /// @param token The address of the disallowed token
+    event TokenDisallowed(IERC20 indexed token);
+    /// @notice Emitted when the price is updated
+    /// @param token The address of the token used for payment
+    /// @param newPrice The new price of the credits batch in the specified token
+    event PriceIsUpdated(IERC20 indexed token, uint256 newPrice);
+
     /// @notice Emitted when the receiver address is changed
     /// @param oldReceiver The old receiver address
     /// @param newReceiver The new receiver address
@@ -72,6 +84,7 @@ contract CreditStation is AccessManaged, IVersioned, ICreditStation {
     /// @param accessManagerAddress The address of the Access Manager contract
     /// @param initialReceiver The initial receiver of the payments
     constructor(address accessManagerAddress, address initialReceiver) AccessManaged(accessManagerAddress) {
+        require(initialReceiver != address(0), AddressIsNotSet());
         receiver = initialReceiver;
     }
 
@@ -91,7 +104,6 @@ contract CreditStation is AccessManaged, IVersioned, ICreditStation {
     {
         (bool accepted, uint256 price) = _prices.tryGet(address(token));
         require(accepted, TokenIsNotAccepted(token));
-        require(token.transferFrom(msg.sender, receiver, price), TokenTransferFailed(token, msg.sender, price));
         PaymentId currentPaymentId = _nextPaymentId;
         _nextPaymentId = _next(_nextPaymentId);
 
@@ -102,6 +114,8 @@ contract CreditStation is AccessManaged, IVersioned, ICreditStation {
             to: purchaser,
             tokenAddress: token
         });
+
+        require(token.transferFrom(msg.sender, receiver, price), TokenTransferFailed(token, msg.sender, price));
     }
 
     /// @notice Sets price of credits batch in a specific token
@@ -110,15 +124,21 @@ contract CreditStation is AccessManaged, IVersioned, ICreditStation {
     /// @param price The price of the credits batch in the specified token
     function setPrice(IERC20 token, uint256 price) external override restricted {
         if (price == 0) {
-            _prices.remove(address(token));
+            require(_prices.remove(address(token)), TokenIsNotAccepted(token));
+            emit TokenDisallowed(token);
         } else {
-            _prices.set(address(token), price);
+            if(_prices.set(address(token), price)) {
+                emit TokenAllowed(token);
+            } else {
+                emit PriceIsUpdated(token, price);
+            }
         }
     }
 
     /// @notice Sets the receiver address
     /// @param newReceiver The new receiver address
     function setReceiver(address newReceiver) external override restricted {
+        require(newReceiver != address(0), AddressIsNotSet());
         emit ReceiverWasChanged(receiver, newReceiver);
         receiver = newReceiver;
     }
@@ -143,13 +163,8 @@ contract CreditStation is AccessManaged, IVersioned, ICreditStation {
 
     /// @notice Gets all supported tokens for payment
     /// @return tokens The list of supported tokens addresses
-    function getSupportedTokens() external view override returns (IERC20[] memory tokens) {
-        uint256 length = _prices.length();
-        tokens = new IERC20[](length);
-        for (uint256 i = 0; i < length; ++i) {
-            (address tokenAddress, ) = _prices.at(i);
-            tokens[i] = IERC20(tokenAddress);
-        }
+    function getSupportedTokens() external view override returns (address[] memory tokens) {
+        return _prices.keys();
     }
 
     /// @notice Checks if a token is accepted for payment

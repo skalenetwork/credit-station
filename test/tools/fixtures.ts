@@ -1,15 +1,16 @@
 
-import { network } from "hardhat";
-import { deployMainnet } from "../../migrations/deployMainnet.js";
-import { deploySchain } from "../../migrations/deploySchain.js";
-const { ethers, networkHelpers } = await network.connect();
+import { ethers } from "hardhat";
+import { deployMainnet } from "../../migrations/deployMainnet";
+import { deploySchain } from "../../migrations/deploySchain";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { Token } from "../../typechain-types";
 
 // Fixtures
 
 const deployMainnetFixture = async () => {
     const [owner, receiver] = await ethers.getSigners();
     const contracts = await deployMainnet(owner, receiver, "test");
-    const token = await ethers.deployContract("Token", ["Test Token", "TTK"]);
+    const token = await ethers.deployContract("Token", ["Test Token", "TTK"]) as Token;
     return { ...contracts, token };
 }
 
@@ -20,7 +21,7 @@ const deploySchainFixture = async () => {
 }
 
 const allowToken = async () => {
-    const contracts = await deployMainnetFixture();
+    const contracts = await cleanMainnetDeployment();
     const { creditStation, token } = contracts;
     const price = ethers.parseEther("1");
     await creditStation.setPrice(token, price);
@@ -28,7 +29,7 @@ const allowToken = async () => {
 }
 
 const registerAgent = async () => {
-    const contracts = await deploySchainFixture();
+    const contracts = await cleanSchainDeployment();
     const { accessManager } = contracts;
     const [, agent] = await ethers.getSigners();
     await accessManager.grantRole(
@@ -41,7 +42,7 @@ const registerAgent = async () => {
 
 // External functions
 
-export const cleanMainnetDeployment = async () => networkHelpers.loadFixture(deployMainnetFixture);
-export const cleanSchainDeployment = async () => networkHelpers.loadFixture(deploySchainFixture);
-export const mainnetWithAllowedToken = async () => networkHelpers.loadFixture(allowToken);
-export const schainWithAgent = async () => networkHelpers.loadFixture(registerAgent);
+export const cleanMainnetDeployment = async () => loadFixture(deployMainnetFixture);
+export const cleanSchainDeployment = async () => loadFixture(deploySchainFixture);
+export const mainnetWithAllowedToken = async () => loadFixture(allowToken);
+export const schainWithAgent = async () => loadFixture(registerAgent);

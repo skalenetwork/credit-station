@@ -1,8 +1,7 @@
-import { schainWithAgent } from "./tools/fixtures.js";
-import { network } from "hardhat";
+import { schainWithAgent } from "./tools/fixtures";
+import { ethers } from "hardhat";
 import { should } from "chai";
 
-const { ethers } = await network.connect();
 should();
 
 describe("Ledger", () => {
@@ -13,7 +12,7 @@ describe("Ledger", () => {
         const { ledger } = await schainWithAgent();
         (await ledger.isFulfilled(paymentId)).should.be.equal(false);
         await (await ledger.connect(agent).fulfill(paymentId, user, {value}))
-            .should.changeEtherBalance(ethers, user, value);
+            .should.changeEtherBalance(user, value);
         (await ledger.isFulfilled(paymentId)).should.be.equal(true);
     });
 });

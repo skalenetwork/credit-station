@@ -1,8 +1,15 @@
-import hardhatToolboxMochaEthersPlugin from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
-import { configVariable, defineConfig } from "hardhat/config";
+import { HardhatUserConfig } from "hardhat/config";
+import * as dotenv from "dotenv";
+import "@nomicfoundation/hardhat-verify";
+import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-network-helpers";
+import "@nomicfoundation/hardhat-chai-matchers";
+import "@typechain/hardhat";
+import "solidity-coverage"
 
-export default defineConfig({
-  plugins: [hardhatToolboxMochaEthersPlugin],
+dotenv.config();
+
+const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.30",
     settings: {
@@ -14,14 +21,13 @@ export default defineConfig({
   },
   networks: {
     custom: {
-      type: "http",
-      url: configVariable("ENDPOINT"),
-      accounts: [configVariable("PRIVATE_KEY")]
+      url: process.env.ENDPOINT || "http://localhost:8545",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
   },
-  verify: {
-    etherscan: {
-      apiKey: configVariable("ETHERSCAN")
-    }
+  etherscan: {
+    apiKey: process.env.ETHERSCAN
   }
-});
+};
+
+export default config;
