@@ -1,5 +1,5 @@
 import {promises as fs} from 'fs';
-import { contracts } from '../migrations/deploy.js';
+import { contracts } from '../migrations/deploy';
 import { ethers } from "hardhat";
 import { getAbi, getVersion } from '@skalenetwork/upgrade-tools';
 
