@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import chalk from "chalk";
 import { AddressLike } from "ethers";
-import { getVersion } from "@skalenetwork/upgrade-tools";
+import { getVersion, verify } from "@skalenetwork/upgrade-tools";
 import { deployAccessManager, deployCreditStation, storeAddresses, successCode, failureCode } from "./deploy";
 
 const OWNER_PARAMETER = "OWNER";
@@ -38,6 +38,16 @@ const main = async () => {
         [accessManager, creditStation],
         "mainnet"
     );
+
+    console.log("Verify");
+    const coder = ethers.AbiCoder.defaultAbiCoder();
+    await verify(
+        "CreditStationAccessManager",
+        accessManager,
+        coder.encode(["address"], [await ethers.resolveAddress(owner)]));
+
+    await verify("CreditStation", creditStation, constructorArguments);
+
     console.log("Done");
 }
 
