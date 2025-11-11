@@ -40,6 +40,8 @@ interface ICreditStation {
         address purchaser,
         IERC20 token
     ) external;
+    /// @notice Pauses the contract
+    function pause() external;
     /// @notice Sets price of credits batch in a specific token
     /// @notice Setting price to 0 removes the token from accepted tokens list
     /// @param token The address of the token
@@ -48,6 +50,8 @@ interface ICreditStation {
     /// @notice Sets the receiver address
     /// @param newReceiver The new receiver address
     function setReceiver(address newReceiver) external;
+    /// @notice Unpauses the contract
+    function unpause() external;
     /// @notice Gets price of credits batch in a specific token
     /// @param token The address of the token
     /// @return price The price of the credits batch in the specified token
