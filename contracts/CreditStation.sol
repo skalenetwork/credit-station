@@ -26,6 +26,7 @@ pragma solidity ^0.8.30;
 import {
     AccessManaged
 } from "@openzeppelin/contracts/access/manager/AccessManaged.sol";
+import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
 import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
 import { AddressIsNotSet } from "./interfaces/error.sol";
@@ -37,7 +38,7 @@ import { PaymentId, SchainHash } from "./interfaces/types.sol";
 /// @title Credit Station
 /// @author Dmytro Stebaiev
 /// @notice This contract is responsible for receiving payments for credits.
-contract CreditStation is AccessManaged, IVersioned, ICreditStation {
+contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     using EnumerableMap for EnumerableMap.AddressToUintMap;
 
     /// @notice The version of the contract
@@ -100,6 +101,7 @@ contract CreditStation is AccessManaged, IVersioned, ICreditStation {
         IERC20 token
     )
         external
+        whenNotPaused
         override
     {
         (bool accepted, uint256 price) = _prices.tryGet(address(token));
@@ -116,6 +118,16 @@ contract CreditStation is AccessManaged, IVersioned, ICreditStation {
         });
 
         require(token.transferFrom(msg.sender, receiver, price), TokenTransferFailed(token, msg.sender, price));
+    }
+
+    /// @notice Pauses the contract
+    function pause() external override restricted {
+        _pause();
+    }
+
+    /// @notice Unpauses the contract
+    function unpause() external override restricted {
+        _unpause();
     }
 
     /// @notice Sets price of credits batch in a specific token
