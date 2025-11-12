@@ -69,6 +69,41 @@ export const deployLedger = async (
     return ledger;
 }
 
+export const transferOwnership = async (
+    accessManager: CreditStationAccessManager,
+    oldOwner: AddressLike,
+    newOwner: AddressLike
+) => {
+    if ((await accessManager.hasRole(await accessManager.ADMIN_ROLE(), oldOwner)).isMember) {
+        console.log(`Grant permissions to ${await ethers.resolveAddress(newOwner)}`);
+        let response = await accessManager.grantRole(
+            await accessManager.ADMIN_ROLE(),
+            newOwner,
+            0
+        );
+        await response.wait();
+        if ((await accessManager.hasRole(await accessManager.ADMIN_ROLE(), newOwner)).isMember) {
+            console.log(`Revoke permissions from ${await ethers.resolveAddress(oldOwner)}`);
+            response = await accessManager.renounceRole(
+                await accessManager.ADMIN_ROLE(),
+                oldOwner
+            );
+            await response.wait();
+            if ((await accessManager.hasRole(await accessManager.ADMIN_ROLE(), oldOwner)).isMember) {
+                throw new Error(
+                    `Failed to revoke ADMIN_ROLE from deployer ${await ethers.resolveAddress(oldOwner)}`
+                );
+            }
+        } else {
+            throw new Error(
+                `Failed to grant ADMIN_ROLE to owner ${await ethers.resolveAddress(newOwner)}`
+            );
+        }
+    } else {
+        throw new Error(`Deployer ${await ethers.resolveAddress(oldOwner)} does not have ADMIN_ROLE`);
+    }
+}
+
 export const storeAddresses = async (contracts: string[], addresses: AddressLike[], title: string) => {
     const addressesList = new Map<string, string>();
     for (let i = 0; i < contracts.length; i++) {

@@ -28,3 +28,4 @@
 
 # SKALE files
 data/
+.env

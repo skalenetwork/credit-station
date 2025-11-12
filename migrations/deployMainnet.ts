@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import chalk from "chalk";
 import { AddressLike } from "ethers";
 import { getVersion, verify } from "@skalenetwork/upgrade-tools";
-import { deployAccessManager, deployCreditStation, storeAddresses, successCode, failureCode } from "./deploy";
+import { deployAccessManager, deployCreditStation, storeAddresses, successCode, failureCode, transferOwnership } from "./deploy";
 
 const OWNER_PARAMETER = "OWNER";
 const RECEIVER_PARAMETER = "RECEIVER";
@@ -21,16 +21,20 @@ const main = async () => {
     const owner = process.env[OWNER_PARAMETER] || await ethers.resolveAddress(deployer);
     const receiver = process.env[RECEIVER_PARAMETER] || await ethers.resolveAddress(deployer);
 
-    if (!process.env[OWNER_PARAMETER]) {
+    if (process.env[OWNER_PARAMETER]) {
+        console.log(chalk.gray(`OWNER is set to ${owner}`));
+    } else {
         console.log(chalk.yellow(`OWNER is not set`));
         console.log(chalk.yellow(`Using deployer address: ${owner}`));
     }
-    if (!process.env[RECEIVER_PARAMETER]) {
+    if (process.env[RECEIVER_PARAMETER]) {
+        console.log(chalk.gray(`RECEIVER is set to ${receiver}`));
+    } else {
         console.log(chalk.yellow(`RECEIVER is not set`));
         console.log(chalk.yellow(`Using deployer address: ${receiver}`));
     }
 
-    const { accessManager, creditStation } = await deployMainnet(owner, receiver, await getVersion());
+    const { accessManager, creditStation } = await deployMainnet(deployer, receiver, await getVersion());
 
     console.log(chalk.gray("Storing addresses"));
     await storeAddresses(
@@ -38,6 +42,11 @@ const main = async () => {
         [accessManager, creditStation],
         "mainnet"
     );
+
+    if (await ethers.resolveAddress(deployer) !== await ethers.resolveAddress(owner)) {
+        console.log("Setup permissions");
+        await transferOwnership(accessManager, deployer, owner);
+    }
 
     console.log("Verify");
     const coder = ethers.AbiCoder.defaultAbiCoder();
