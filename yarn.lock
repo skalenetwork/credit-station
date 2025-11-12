@@ -2341,9 +2341,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@skalenetwork/upgrade-tools@npm:4.0.0-constructor.1":
-  version: 4.0.0-constructor.1
-  resolution: "@skalenetwork/upgrade-tools@npm:4.0.0-constructor.1"
+"@skalenetwork/upgrade-tools@npm:4.0.0-verification.1":
+  version: 4.0.0-verification.1
+  resolution: "@skalenetwork/upgrade-tools@npm:4.0.0-verification.1"
   dependencies:
     "@nomicfoundation/hardhat-ethers": "npm:^3.0.0"
     "@nomicfoundation/hardhat-verify": "npm:2.0.14"
@@ -2358,7 +2358,7 @@ __metadata:
     ethereumjs-util: "npm:^7.1.4"
     hardhat: "npm:^2.9.9"
     semaphore-async-await: "npm:^1.5.1"
-  checksum: 10c0/3f04d3bcf53ca46cdf4299af863f783853e6d16ffe04ee0cc9e7e8683f4e9fdd281629e61d251394c73dafc766170ddfbd198c733ab95a7ffa25fff239959d73
+  checksum: 10c0/d60ef36d6a58c22ee8211802f51d54210b2bb6cb1d785b919eecacd519f310d97f48c1b8e6a598f53b2987e3f08a1294890705e7cba1263999c96940fce3c262
   languageName: node
   linkType: hard
 
@@ -7599,7 +7599,7 @@ __metadata:
     "@nomicfoundation/hardhat-network-helpers": "npm:^1.1.2"
     "@nomicfoundation/hardhat-verify": "npm:^2.1.3"
     "@openzeppelin/contracts": "npm:5.4.0"
-    "@skalenetwork/upgrade-tools": "npm:4.0.0-constructor.1"
+    "@skalenetwork/upgrade-tools": "npm:4.0.0-verification.1"
     "@typechain/ethers-v6": "npm:^0.5.1"
     "@typechain/hardhat": "npm:^9.1.0"
     "@types/chai": "npm:^4.2.0"
