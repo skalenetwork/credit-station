@@ -46,7 +46,13 @@ const main = async () => {
         accessManager,
         coder.encode(["address"], [await ethers.resolveAddress(owner)]));
 
-    await verify("CreditStation", creditStation, constructorArguments);
+    await verify(
+        "CreditStation",
+        creditStation,
+        coder.encode(
+            ["address", "address"],
+            [await ethers.resolveAddress(accessManager), await ethers.resolveAddress(receiver)]
+        ));
 
     console.log("Done");
 }
