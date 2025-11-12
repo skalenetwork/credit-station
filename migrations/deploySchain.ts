@@ -35,19 +35,21 @@ const main = async () => {
     );
 
     console.log("Verify");
-        const coder = ethers.AbiCoder.defaultAbiCoder();
-        await verify(
-            "CreditStationAccessManager",
-            accessManager,
-            coder.encode(["address"], [await ethers.resolveAddress(owner)]));
+    const coder = ethers.AbiCoder.defaultAbiCoder();
+    await verify(
+        "CreditStationAccessManager",
+        accessManager,
+        coder.encode(
+            ["address"], [await ethers.resolveAddress(owner)]
+        ).slice(2));
 
-        await verify(
-            "Ledger",
-            ledger,
-            coder.encode(
-                ["address"],
-                [await ethers.resolveAddress(accessManager)]
-            ));
+    await verify(
+        "Ledger",
+        ledger,
+        coder.encode(
+            ["address"],
+            [await ethers.resolveAddress(accessManager)]
+        ).slice(2));
 
     console.log("Done");
 }
