@@ -1,0 +1,65 @@
+# cspell:words solcoverjs
+
+name: test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x]
+
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        submodules: true
+
+    - name: Set up Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'yarn'
+
+    - name: Install project
+      run: yarn install
+
+    - name: Spell check
+      run: yarn cspell
+
+    - name: Compile
+      run: yarn compile
+
+    - name: Lint
+      run: yarn fullCheck
+
+    - name: Slither
+      uses: crytic/slither-action@v0.4.1
+      with:
+        ignore-compile: true
+        slither-args: "--compile-force-framework hardhat"
+        node-version: ${{ matrix.node-version }}
+
+    - name: Test deployment
+      run: ./scripts/test_deploy.sh
+
+    # - name: Test upgrade
+    #   env:
+    #     NODE_VERSION: ${{ matrix.node-version }}
+    #   run: ./scripts/test_upgrade.sh
+
+    - name: Test ABI generation
+      run: yarn hardhat run scripts/generateAbi.ts
+
+    - name: Run tests
+      run: yarn hardhat coverage
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
