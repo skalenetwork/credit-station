@@ -29,6 +29,8 @@ Together with the `credit-distributor` off-chain agent, it provides a simple way
 
 Credit station project is part of the [SKALE-expand](https://blog.skale.space/blog/skale-expand-bringing-gas-free-instant-private-execution-to-any-evm-blockchain) vision of SKALE. With the new pricing model, developers can buy credits using their preferred token on the chain where skale-manager is deployed, and use them on SKALE-chains to pay-per-usage on network hubs, instead of having to buy their own chain and paying the monthly rate.
 
+Details about the repository structure can be found in [ARCHITECTURE](./docs/ARCHITECTURE.md).
+
 ## Installation & Setup
 
 ### Prerequisites
