@@ -51,13 +51,15 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     string public override version;
     /// @notice Address that receives the payments for credits
     address public receiver;
+
+    /// @notice Mapping from payment ID to payment information
+    mapping(PaymentId paymentId => PaymentInfo paymentInfo) public paymentsInfo;
+
     PaymentId private _nextPaymentId = PaymentId.wrap(1);
     EnumerableMap.AddressToUintMap private _prices;
 
     ///@dev Never remove items from this Set to preserve order
     TypedMap.AddressToPaymentIdSetMap private _paymentsByUser;
-
-    mapping(PaymentId paymentId => PaymentInfo paymentInfo) private _paymentsInfo;
 
     /// @notice Emitted when a payment is received
     /// @param id The payment ID
@@ -132,7 +134,7 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
         });
 
         assert(_paymentsByUser.add(msg.sender, currentPaymentId));
-        _paymentsInfo[currentPaymentId] = PaymentInfo({
+        paymentsInfo[currentPaymentId] = PaymentInfo({
             schainHash: toSchainHash(schainName),
             from: msg.sender,
             to: purchaser,
@@ -236,8 +238,7 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
         PaymentId paymentId
     ) external view override returns (PaymentInfo memory payment) {
         require(paymentId < _nextPaymentId, PaymentIdDoesNotExist(paymentId));
-        payment = _paymentsInfo[paymentId];
-        return payment;
+        return paymentsInfo[paymentId];
     }
 
     /// @notice Gets price of credits batch in a specific token
