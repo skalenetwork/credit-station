@@ -55,10 +55,12 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     /// @notice Mapping from payment ID to payment information
     mapping(PaymentId paymentId => PaymentInfo paymentInfo) public paymentsInfo;
 
+    /// @notice Mapping from user address to their last payment ID. Zero means no payments made.
+    /// @dev Zero is never a valid PaymentId
+    mapping(address user => PaymentId lastPaymentId) public lastPaymentByUser;
+
     PaymentId private _nextPaymentId = PaymentId.wrap(1);
     EnumerableMap.AddressToUintMap private _prices;
-
-    ///@dev Never remove items from this Set to preserve order
     TypedMap.AddressToPaymentIdSetMap private _paymentsByUser;
 
     /// @notice Emitted when a payment is received
@@ -142,6 +144,8 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
             tokenAddress: token
         });
 
+        lastPaymentByUser[msg.sender] = currentPaymentId;
+
         require(token.transferFrom(msg.sender, receiver, price), TokenTransferFailed(token, msg.sender, price));
     }
 
@@ -204,9 +208,8 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     function getLastPayment(
         address user
     ) external view override returns (PaymentId paymentId) {
-        uint256 len = _paymentsByUser.length(user);
-        require(len > 0, NoPaymentsForUser(user));
-        return _paymentsByUser.at(user, len - 1);
+        paymentId = lastPaymentByUser[user];
+        require(PaymentId.wrap(0) < paymentId, NoPaymentsForUser(user));
     }
 
     /// @notice Gets payment information by its id
@@ -236,7 +239,10 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     function getPaymentInfo(
         PaymentId paymentId
     ) external view override returns (PaymentInfo memory payment) {
-        require(paymentId < _nextPaymentId, PaymentIdDoesNotExist(paymentId));
+        require(
+            paymentId < _nextPaymentId && PaymentId.wrap(0) < paymentId,
+            PaymentIdDoesNotExist(paymentId)
+        );
         return paymentsInfo[paymentId];
     }
 

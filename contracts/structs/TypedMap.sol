@@ -2,7 +2,7 @@
 
 /**
  *   TypedMap.sol - credit-station
- *   Copyright (C) 2025-Present SKALE Labs
+ *   Copyright (C) 2026-Present SKALE Labs
  *   @author Eduardo Vasques
  *
  *   credit-station is free software: you can redistribute it and/or modify
