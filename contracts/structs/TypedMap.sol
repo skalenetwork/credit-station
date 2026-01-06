@@ -25,49 +25,57 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 
 import { PaymentId } from "../interfaces/types.sol";
 
-import { TypedSet } from "./TypedSet.sol";
-
 
 /// @title Typed Map
 /// @author Eduardo Vasques
 /// @notice A library for Custom Typed mappings
 library TypedMap {
     using EnumerableSet for EnumerableSet.UintSet;
-    using TypedSet for TypedSet.PaymentIdSet;
-    struct AddressToPaymentIdSetMap {
-        mapping(address key => TypedSet.PaymentIdSet set) inner;
+
+    struct AddressToPaymentIdArrayMap {
+        mapping(address key => PaymentId[] paymentIds) inner;
     }
 
     function add(
-        AddressToPaymentIdSetMap storage map,
+        AddressToPaymentIdArrayMap storage map,
         address key,
         PaymentId value
-    ) internal returns (bool result) {
-        return map.inner[key].add(value);
+    ) internal {
+        map.inner[key].push(value);
     }
 
     function at(
-        AddressToPaymentIdSetMap storage map,
+        AddressToPaymentIdArrayMap storage map,
         address key,
         uint256 index
     ) internal view returns (PaymentId paymentId) {
-        uint256 rawValue = map.inner[key].inner.at(index);
-        return PaymentId.wrap(rawValue);
+        return map.inner[key][index];
     }
 
     function length(
-        AddressToPaymentIdSetMap storage map,
+        AddressToPaymentIdArrayMap storage map,
         address key
     ) internal view returns (uint256 size) {
-        return map.inner[key].length();
+        return map.inner[key].length;
     }
 
     function values(
-        AddressToPaymentIdSetMap storage map,
+        AddressToPaymentIdArrayMap storage map,
         address key,
         uint256 startIndex,
         uint256 endIndex
-    ) internal view returns (PaymentId[] memory ids) {
-        return map.inner[key].values(startIndex, endIndex);
+    ) internal view returns (PaymentId[] memory paymentIds) {
+        uint256 len = map.inner[key].length;
+
+        uint256 end = endIndex > len ? len : endIndex;
+        uint256 resultLength = end - startIndex;
+        paymentIds = new PaymentId[](resultLength);
+
+        for (uint256 i = 0; i < resultLength; ) {
+            paymentIds[i] = map.inner[key][startIndex + i];
+            unchecked {
+                ++i;
+            }
+        }
     }
 }

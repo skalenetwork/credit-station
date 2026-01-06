@@ -42,7 +42,7 @@ import { TypedMap } from "./structs/TypedMap.sol";
 /// @notice This contract is responsible for receiving payments for credits.
 contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     using EnumerableMap for EnumerableMap.AddressToUintMap;
-    using TypedMap for TypedMap.AddressToPaymentIdSetMap;
+    using TypedMap for TypedMap.AddressToPaymentIdArrayMap;
 
     /// @notice Maximum number of queried items at once
     uint256 public constant MAX_QUERY_SIZE = 10_000;
@@ -55,13 +55,9 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     /// @notice Mapping from payment ID to payment information
     mapping(PaymentId paymentId => PaymentInfo paymentInfo) public paymentsInfo;
 
-    /// @notice Mapping from user address to their last payment ID. Zero means no payments made.
-    /// @dev Zero is never a valid PaymentId
-    mapping(address user => PaymentId lastPaymentId) public lastPaymentByUser;
-
     PaymentId private _nextPaymentId = PaymentId.wrap(1);
     EnumerableMap.AddressToUintMap private _prices;
-    TypedMap.AddressToPaymentIdSetMap private _paymentsByUser;
+    TypedMap.AddressToPaymentIdArrayMap private _paymentsByUser;
 
     /// @notice Emitted when a payment is received
     /// @param id The payment ID
@@ -135,7 +131,7 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
             tokenAddress: token
         });
 
-        assert(_paymentsByUser.add(msg.sender, currentPaymentId));
+        _paymentsByUser.add(msg.sender, currentPaymentId);
         paymentsInfo[currentPaymentId] = PaymentInfo({
             schainHash: toSchainHash(schainName),
             from: msg.sender,
@@ -143,8 +139,6 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
             blockNumber: block.number,
             tokenAddress: token
         });
-
-        lastPaymentByUser[msg.sender] = currentPaymentId;
 
         require(token.transferFrom(msg.sender, receiver, price), TokenTransferFailed(token, msg.sender, price));
     }
@@ -208,8 +202,9 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     function getLastPayment(
         address user
     ) external view override returns (PaymentId paymentId) {
-        paymentId = lastPaymentByUser[user];
-        require(PaymentId.wrap(0) < paymentId, NoPaymentsForUser(user));
+        uint256 length = _paymentsByUser.length(user);
+        require(length > 0, NoPaymentsForUser(user));
+        paymentId = _paymentsByUser.at(user, length - 1);
     }
 
     /// @notice Gets payment information by its id
