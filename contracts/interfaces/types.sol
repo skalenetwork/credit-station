@@ -20,6 +20,8 @@
  *   along with credit-station.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// cspell:words IERC20
+
 pragma solidity ^0.8.30;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
