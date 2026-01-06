@@ -39,6 +39,8 @@ describe("CreditStation", () => {
         const schainHash = await creditStation.toSchainHash(schain);
         await token.mint(user, price * 2n);
         await token.connect(user).approve(creditStation, price * 2n);
+        expect(await creditStation.getPaymentIds(user.address, 0n, 2n**256n - 1n)).to.deep.equal([]);
+
         const buyTransaction = await creditStation.connect(user).buy(schain, user, token);
         await buyTransaction.should.changeTokenBalance(
                 token,
@@ -63,6 +65,7 @@ describe("CreditStation", () => {
         expect(await creditStation.getPaymentIds(user.address, 0n, 2n)).to.deep.equal([1n, 2n]);
         expect(await creditStation.getPaymentIds(user.address, 0n, 20_000n)).to.deep.equal([1n, 2n]);
         expect(await creditStation.getPaymentIds(user.address, 2n, 20_000n)).to.deep.equal([]);
+        expect(await creditStation.getNumberOfPayments(user.address)).to.deep.equal(2n);
 
         await creditStation.getPaymentIds(user.address, 3n, 2n).should.be.revertedWithCustomError(
             creditStation,
@@ -73,6 +76,8 @@ describe("CreditStation", () => {
             creditStation,
             "InvalidIndices"
         );
+
+
 
     });
 
