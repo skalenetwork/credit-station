@@ -76,9 +76,6 @@ describe("CreditStation", () => {
             creditStation,
             "InvalidIndices"
         );
-
-
-
     });
 
     it("should revert when getting non-existing payment info", async () => {

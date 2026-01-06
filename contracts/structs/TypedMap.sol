@@ -70,5 +70,4 @@ library TypedMap {
     ) internal view returns (PaymentId[] memory ids) {
         return map.inner[key].values(startIndex, endIndex);
     }
-
 }

@@ -223,14 +223,13 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
         if (len == 0){
             return new PaymentId[](0);
         }
-
         require(startIndex < endIndex, InvalidIndices());
-
         endIndex = endIndex - startIndex > MAX_QUERY_SIZE ? startIndex + MAX_QUERY_SIZE : endIndex;
 
         // endIndex is adjusted to the length of the array in the TypedSet library, if required
         return _paymentsByUser.values(user, startIndex, endIndex);
     }
+
     /// @notice Gets payment information by its id
     /// @param paymentId The id of the payment
     /// @return payment returns a payment if there is one, reverts otherwise
