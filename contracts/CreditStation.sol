@@ -4,6 +4,7 @@
  *   CreditStation.sol - credit-station
  *   Copyright (C) 2025-Present SKALE Labs
  *   @author Dmytro Stebaiev
+ *   @author Eduardo Vasques
  *
  *   credit-station is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published
@@ -32,14 +33,19 @@ import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableM
 import { AddressIsNotSet } from "./interfaces/error.sol";
 import { ICreditStation, IERC20 } from "./interfaces/ICreditStation.sol";
 import { IVersioned } from "./interfaces/IVersioned.sol";
-import { PaymentId, SchainHash } from "./interfaces/types.sol";
-
+import { PaymentId, PaymentInfo, SchainHash } from "./interfaces/types.sol";
+import { TypedMap } from "./structs/TypedMap.sol";
 
 /// @title Credit Station
 /// @author Dmytro Stebaiev
+/// @author Eduardo Vasques
 /// @notice This contract is responsible for receiving payments for credits.
 contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     using EnumerableMap for EnumerableMap.AddressToUintMap;
+    using TypedMap for TypedMap.AddressToPaymentIdSetMap;
+
+    /// @notice Maximum number of queried items at once
+    uint256 public constant MAX_QUERY_SIZE = 10_000;
 
     /// @notice The version of the contract
     string public override version;
@@ -47,6 +53,11 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     address public receiver;
     PaymentId private _nextPaymentId = PaymentId.wrap(1);
     EnumerableMap.AddressToUintMap private _prices;
+
+    ///@dev Never remove items from this Set to preserve order
+    TypedMap.AddressToPaymentIdSetMap private _paymentsByUser;
+
+    mapping(PaymentId paymentId => PaymentInfo paymentInfo) private _paymentsInfo;
 
     /// @notice Emitted when a payment is received
     /// @param id The payment ID
@@ -80,6 +91,9 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
 
     error TokenIsNotAccepted(IERC20 token);
     error TokenTransferFailed(IERC20 token, address from, uint256 amount);
+    error NoPaymentsForUser(address user);
+    error InvalidIndices();
+    error PaymentIdDoesNotExist(PaymentId paymentId);
 
     /// @notice Constructor
     /// @param accessManagerAddress The address of the Access Manager contract
@@ -114,6 +128,15 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
             schainHash: toSchainHash(schainName),
             from: msg.sender,
             to: purchaser,
+            tokenAddress: token
+        });
+
+        assert(_paymentsByUser.add(msg.sender, currentPaymentId));
+        _paymentsInfo[currentPaymentId] = PaymentInfo({
+            schainHash: toSchainHash(schainName),
+            from: msg.sender,
+            to: purchaser,
+            blockNumber: block.number,
             tokenAddress: token
         });
 
@@ -163,6 +186,59 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     }
 
     // External view
+
+    /// @notice Gets the number of payments made by a user
+    /// @param user The address of the buyer
+    /// @return numberOfPayments returns the number of payments made by the user
+    function getNumberOfPayments(
+        address user
+    ) external view override returns (uint256 numberOfPayments) {
+        return _paymentsByUser.length(user);
+    }
+
+    /// @notice Gets the last payment made by a user
+    /// @param user The address of the buyer
+    /// @return paymentId returns the last payment ID if there is one, reverts otherwise
+    function getLastPayment(
+        address user
+    ) external view override returns (PaymentId paymentId) {
+        uint256 len = _paymentsByUser.length(user);
+        require(len > 0, NoPaymentsForUser(user));
+        return _paymentsByUser.at(user, len - 1);
+    }
+
+    /// @notice Gets payment information by its id
+    /// @param user The address of the buyer
+    /// @param startIndex The start index (inclusive) of the payments to get
+    /// @param endIndex The end index (exclusive) of the payments to get
+    /// @return payments returns a list of payment IDs if there are any, reverts otherwise
+    function getPaymentIds(
+        address user,
+        uint256 startIndex,
+        uint256 endIndex
+    ) external view override returns (PaymentId[] memory payments) {
+        uint256 len = _paymentsByUser.length(user);
+        if (len == 0){
+            return new PaymentId[](0);
+        }
+
+        require(startIndex < endIndex, InvalidIndices());
+
+        endIndex = endIndex - startIndex > MAX_QUERY_SIZE ? startIndex + MAX_QUERY_SIZE : endIndex;
+
+        // endIndex is adjusted to the length of the array in the TypedSet library, if required
+        return _paymentsByUser.values(user, startIndex, endIndex);
+    }
+    /// @notice Gets payment information by its id
+    /// @param paymentId The id of the payment
+    /// @return payment returns a payment if there is one, reverts otherwise
+    function getPaymentInfo(
+        PaymentId paymentId
+    ) external view override returns (PaymentInfo memory payment) {
+        require(paymentId < _nextPaymentId, PaymentIdDoesNotExist(paymentId));
+        payment = _paymentsInfo[paymentId];
+        return payment;
+    }
 
     /// @notice Gets price of credits batch in a specific token
     /// @param token The address of the token
