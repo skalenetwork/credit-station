@@ -4,6 +4,7 @@
  *   types.sol - credit-station
  *   Copyright (C) 2025-Present SKALE Labs
  *   @author Dmytro Stebaiev
+ *   @author Eduardo Vasques
  *
  *   credit-station is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published
@@ -19,7 +20,34 @@
  *   along with credit-station.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// cspell:words IERC20
+
 pragma solidity ^0.8.30;
+
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 type PaymentId is uint256;
 type SchainHash is bytes32;
+
+using {
+    _paymentIdLess as <
+} for PaymentId global;
+
+
+struct PaymentInfo {
+    SchainHash schainHash;
+    address from;
+    address to;
+    uint256 blockNumber;
+    IERC20 tokenAddress;
+}
+
+/**
+ * @notice Checks if one PaymentId is less than another
+ * @param a The first PaymentId
+ * @param b The second PaymentId
+ * @return less True if `a` is less than `b`, false otherwise
+ */
+function _paymentIdLess(PaymentId a, PaymentId b) pure returns (bool less) {
+    return PaymentId.unwrap(a) < PaymentId.unwrap(b);
+}

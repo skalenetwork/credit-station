@@ -4,6 +4,7 @@
  *   ICreditStation.sol - credit-station
  *   Copyright (C) 2025-Present SKALE Labs
  *   @author Dmytro Stebaiev
+ *   @author Eduardo Vasques
  *
  *   credit-station is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published
@@ -25,10 +26,11 @@ pragma solidity ^0.8.30;
 
 import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
-import { SchainHash } from "./types.sol";
+import { SchainHash, PaymentId, PaymentInfo } from "./types.sol";
 
 /// @title Credit Station Interface
 /// @author Dmytro Stebaiev
+/// @author Eduardo Vasques
 /// @notice Interface of the Credit Station contract
 interface ICreditStation {
     /// @notice Pay to get credits on an schain
@@ -52,6 +54,34 @@ interface ICreditStation {
     function setReceiver(address newReceiver) external;
     /// @notice Unpauses the contract
     function unpause() external;
+    /// @notice Gets the number of payments made by a user
+    /// @param user The address of the buyer
+    /// @return numberOfPayments returns the number of payments made by the user
+    function getNumberOfPayments(
+        address user
+    ) external view returns (uint256 numberOfPayments);
+    /// @notice Gets the last payment made by a user
+    /// @param user The address of the buyer
+    /// @return paymentId returns the last payment ID if there is one, reverts otherwise
+    function getLastPayment(
+        address user
+    ) external view returns (PaymentId paymentId);
+    /// @notice Gets the payment IDs made by a user within a specific range (MAX 10_000 each query)
+    /// @param user The address of the buyer
+    /// @param startIndex The start index (inclusive) of the payments to get
+    /// @param endIndex The end index (exclusive) of the payments to get
+    /// @return payments returns a list of payment IDs if there are any, reverts otherwise
+    function getPaymentIds(
+        address user,
+        uint256 startIndex,
+        uint256 endIndex
+    ) external view returns (PaymentId[] memory payments);
+    /// @notice Gets payment information by its id
+    /// @param paymentId The id of the payment
+    /// @return payment returns a payment if there is one, reverts otherwise
+    function getPaymentInfo(
+        PaymentId paymentId
+    ) external view returns (PaymentInfo memory payment);
     /// @notice Gets price of credits batch in a specific token
     /// @param token The address of the token
     /// @return price The price of the credits batch in the specified token

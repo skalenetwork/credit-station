@@ -26,6 +26,13 @@
 .yarn/build-state.yml
 .yarn/install-state.gz
 
+# python
+
+.venv/
+uv.lock
+__pycache__/
+
 # SKALE files
 data/
 .env
+state.json
