@@ -199,8 +199,7 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     /// @notice Gets the last paymentId made in the system
     /// @return paymentId returns the last payment ID made in the system
     function getLastPaymentId() external view override returns (PaymentId paymentId) {
-        uint256 lastId = PaymentId.unwrap(_nextPaymentId) - 1;
-        return PaymentId.wrap(lastId);
+        return _previous(_nextPaymentId);
     }
 
     /// @notice Gets the last payment made by a user
@@ -286,5 +285,12 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     /// @return next The next payment ID
     function _next(PaymentId id) private pure returns (PaymentId next) {
         return PaymentId.wrap(PaymentId.unwrap(id) + 1);
+    }
+
+    /// @notice Get payment ID previous before the provided one
+    /// @param id The payment ID
+    /// @return previous The previous payment ID
+    function _previous(PaymentId id) private pure returns (PaymentId previous) {
+        return PaymentId.wrap(PaymentId.unwrap(id) - 1);
     }
 }
