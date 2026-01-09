@@ -76,6 +76,8 @@ describe("CreditStation", () => {
             creditStation,
             "InvalidIndices"
         );
+
+        await creditStation.getLastPaymentId().should.eventually.be.equal(2n);
     });
 
     it("should revert when getting non-existing payment info", async () => {
