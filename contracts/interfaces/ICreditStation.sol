@@ -67,7 +67,7 @@ interface ICreditStation {
         address user
     ) external view returns (PaymentId paymentId);
     /// @notice Gets the last paymentId made in the system
-    /// @return paymentId returns the last payment ID if there is one, reverts otherwise
+    /// @return paymentId returns the last payment ID made in the system
     function getLastPaymentId() external view returns (PaymentId paymentId);
     /// @notice Gets the payment IDs made by a user within a specific range (MAX 10_000 each query)
     /// @param user The address of the buyer

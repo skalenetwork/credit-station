@@ -197,7 +197,7 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     }
 
     /// @notice Gets the last paymentId made in the system
-    /// @return paymentId returns the last payment ID if there is one, reverts otherwise
+    /// @return paymentId returns the last payment ID made in the system
     function getLastPaymentId() external view override returns (PaymentId paymentId) {
         uint256 lastId = PaymentId.unwrap(_nextPaymentId) - 1;
         return PaymentId.wrap(lastId);
