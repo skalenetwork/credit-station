@@ -196,6 +196,13 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
         return _paymentsByUser.length(user);
     }
 
+    /// @notice Gets the last paymentId made in the system
+    /// @return paymentId returns the last payment ID if there is one, reverts otherwise
+    function getLastPaymentId() external view override returns (PaymentId paymentId) {
+        uint256 lastId = PaymentId.unwrap(_nextPaymentId) - 1;
+        return PaymentId.wrap(lastId);
+    }
+
     /// @notice Gets the last payment made by a user
     /// @param user The address of the buyer
     /// @return paymentId returns the last payment ID if there is one, reverts otherwise
