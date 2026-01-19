@@ -48,7 +48,7 @@ contract Ledger is AccessManaged, IVersioned, ILedger {
     /// @param payment The payment ID
     /// @param purchaser The address of the purchaser
     /// @param amount The amount sent
-    event PaymentFulfilled(PaymentId payment, address purchaser, uint256 amount);
+    event PaymentFulfilled(PaymentId payment, address indexed purchaser, uint256 amount);
 
     error PaymentIsAlreadyFulfilled(PaymentId payment);
 
