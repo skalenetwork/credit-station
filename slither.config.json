@@ -1,3 +1,4 @@
 {
-    "filter_paths": "node_modules|hardhat-dependency-compiler"
+    "filter_paths": "node_modules|hardhat-dependency-compiler",
+    "detectors_to_exclude": "unindexed-event-address"
 }
