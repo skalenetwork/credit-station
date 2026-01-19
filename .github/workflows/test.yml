@@ -39,7 +39,7 @@ jobs:
       run: yarn fullCheck
 
     - name: Slither
-      uses: crytic/slither-action@v0.4.1
+      uses: crytic/slither-action@v0.4.2
       with:
         ignore-compile: true
         slither-args: "--compile-force-framework hardhat"
