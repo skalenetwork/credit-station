@@ -34,25 +34,24 @@ logger = logging.getLogger(__name__)
 
 def run_distributor() -> None:
     config = get_config()
-    state_manager = StateManager(state_file=config.state_file)
-    state = state_manager.load(config.from_block)
+    state_manager = StateManager(state_file=config.general.state_file)
+    state = state_manager.load(config.general.from_block)
 
-    schain_web3 = init_web3(config.schain_endpoint)
-    schain_wallet = Web3Wallet(config.eth_private_key, schain_web3)
-
-    mainnet_cs = MainnetCreditStation(config.mainnet_endpoint, config.mainnet_contracts)
-    schain_cs = SchainCreditStation(config.schain_endpoint, config.schain_contracts, schain_wallet)
+    schain_web3 = init_web3(config.endpoints.schain)
+    schain_wallet = Web3Wallet(config.general.eth_private_key, schain_web3)
+    mainnet_cs = MainnetCreditStation(config.endpoints.mainnet, config.contracts.mainnet)
+    schain_cs = SchainCreditStation(config.endpoints.schain, config.contracts.schain, schain_wallet)
     while True:
         try:
             logging.info('Starting credit distribution cycle')
             state = distribute_credits(mainnet_cs, schain_cs, config, state)
             state_manager.save(state)
-            logger.info(f'Sleeping for {config.agent_loop_sleep} seconds before next cycle')
-            sleep(config.agent_loop_sleep)
+            logger.info(f'Sleeping for {config.agent.loop_sleep} seconds before next cycle')
+            sleep(config.agent.loop_sleep)
         except Exception as e:
             logging.exception(f'Error during credit distribution cycle: {e}')
-            logger.info(f'Sleeping for {config.agent_exception_sleep} seconds before retrying')
-            sleep(config.agent_exception_sleep)
+            logger.info(f'Sleeping for {config.agent.exception_sleep} seconds before retrying')
+            sleep(config.agent.exception_sleep)
 
 
 def distribute_credits(
@@ -62,7 +61,7 @@ def distribute_credits(
     state: State,
 ) -> State:
     all_events = mainnet_cs.credit_station.get_payment_received_events(
-        from_block=state.from_block, schain_name=config.schain_name
+        from_block=state.from_block, schain_name=config.general.schain_name
     )
     last_block = state.from_block
     for event in all_events:
@@ -85,7 +84,7 @@ def fulfill_payment(
     if not is_fulfilled:
         logger.info(f'Fulfilling payment: {event["payment_id"]}')
         schain_cs.ledger.fulfill(
-            event['payment_id'], event['to_address'], value=config.payment_value_wei
+            event['payment_id'], event['to_address'], value=config.payment.value_wei
         )
         logger.info(f'Payment {event["payment_id"]} fulfilled successfully.')
     else:

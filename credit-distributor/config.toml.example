@@ -1,0 +1,20 @@
+[general]
+schain_name = 'test' # required
+eth_private_key = '0x0' # required
+from_block = 1234 # required
+
+[contracts]
+mainnet = '0x0' # required
+schain = '0x0' # required
+
+[endpoints]
+mainnet = 'https://example.com' # required
+schain = 'https://example.com' # required
+
+[agent] # optional
+loop_sleep = 120 # optional
+exception_sleep = 10 # optional
+
+[payment] # optional
+value_eth = 1 # optional
+value_wei = 10000 # optional

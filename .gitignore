@@ -36,3 +36,5 @@ __pycache__/
 data/
 .env
 state.json
+
+config.toml
