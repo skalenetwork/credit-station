@@ -8,6 +8,9 @@ services:
       SCHAIN_NAME: ${SCHAIN_NAME}
       FROM_BLOCK: ${FROM_BLOCK}
       ETH_PRIVATE_KEY: ${ETH_PRIVATE_KEY}
+      PAYMENT_VALUE_ETH: ${PAYMENT_VALUE_ETH}
+      AGENT_EXCEPTION_SLEEP: ${AGENT_EXCEPTION_SLEEP}
+      AGENT_LOOP_SLEEP: ${AGENT_LOOP_SLEEP}
     image: credit-distributor:latest
     container_name: credit_distributor
     build:
