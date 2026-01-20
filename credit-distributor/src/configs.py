@@ -17,37 +17,69 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+# cspell:words customise
+
+import os
+
 from eth_typing import HexStr
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+    TomlConfigSettingsSource,
+)
 from skale.types.schain import SchainName
+
+CONFIG_FILEPATH = os.path.join(os.path.dirname(__file__), os.pardir, 'config.toml')
+
+
+class Endpoints(BaseModel):
+    mainnet: str
+    schain: str
+
+
+class Contracts(BaseModel):
+    mainnet: str
+    schain: str
+
+
+class Agent(BaseModel):
+    loop_sleep: int = 120
+    exception_sleep: int = 10
+
+
+class Payment(BaseModel):
+    value_eth: int = 1
+    value_wei: int = value_eth * 10**18
+
+
+class General(BaseModel):
+    schain_name: SchainName
+    from_block: int
+    eth_private_key: HexStr
+    state_file: str = 'state.json'
 
 
 class Config(BaseSettings):
-    mainnet_endpoint: str
-    schain_endpoint: str
+    model_config = SettingsConfigDict(toml_file=CONFIG_FILEPATH)
 
-    mainnet_contracts: str
-    schain_contracts: str
+    general: General
+    endpoints: Endpoints
+    contracts: Contracts
+    agent: Agent = Agent()
+    payment: Payment = Payment()
 
-    schain_name: SchainName
-
-    from_block: int
-    eth_private_key: HexStr
-
-    state_file: str = 'state.json'
-
-    agent_loop_sleep: int = 120
-    agent_exception_sleep: int = 10
-
-    payment_value_eth: int = 1
-    payment_value_wei: int = payment_value_eth * 10**18
-
-    model_config = SettingsConfigDict(
-        env_file='.env',
-        env_file_encoding='utf-8',
-        case_sensitive=False,
-        extra='ignore',
-    )
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        return (TomlConfigSettingsSource(settings_cls),)
 
 
 def get_config() -> Config:

@@ -1,18 +1,9 @@
 services:
   credit-distributor:
-    environment:
-      MAINNET_ENDPOINT: ${MAINNET_ENDPOINT}
-      SCHAIN_ENDPOINT: ${SCHAIN_ENDPOINT}
-      MAINNET_CONTRACTS: ${MAINNET_CONTRACTS}
-      SCHAIN_CONTRACTS: ${SCHAIN_CONTRACTS}
-      SCHAIN_NAME: ${SCHAIN_NAME}
-      FROM_BLOCK: ${FROM_BLOCK}
-      ETH_PRIVATE_KEY: ${ETH_PRIVATE_KEY}
-      PAYMENT_VALUE_ETH: ${PAYMENT_VALUE_ETH}
-      AGENT_EXCEPTION_SLEEP: ${AGENT_EXCEPTION_SLEEP}
-      AGENT_LOOP_SLEEP: ${AGENT_LOOP_SLEEP}
     image: credit-distributor:latest
     container_name: credit_distributor
+    volumes:
+      - ./config.toml:/app/config.toml:ro
     build:
       context: .
       dockerfile: Dockerfile
