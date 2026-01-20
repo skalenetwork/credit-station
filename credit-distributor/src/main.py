@@ -76,6 +76,10 @@ def distribute_credits(
     return state
 
 
+def get_payment_wei_value(config: Config) -> int:
+    return config.payment.value_eth * 10**18
+
+
 def fulfill_payment(
     event: PaymentReceivedEvent, schain_cs: SchainCreditStation, config: Config
 ) -> None:
@@ -84,7 +88,7 @@ def fulfill_payment(
     if not is_fulfilled:
         logger.info(f'Fulfilling payment: {event["payment_id"]}')
         schain_cs.ledger.fulfill(
-            event['payment_id'], event['to_address'], value=config.payment.value_wei
+            event['payment_id'], event['to_address'], value=get_payment_wei_value(config)
         )
         logger.info(f'Payment {event["payment_id"]} fulfilled successfully.')
     else:
