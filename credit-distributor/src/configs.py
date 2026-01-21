@@ -51,7 +51,6 @@ class Agent(BaseModel):
 
 class Payment(BaseModel):
     value_eth: int = 1
-    value_wei: int = value_eth * 10**18
 
 
 class General(BaseModel):
