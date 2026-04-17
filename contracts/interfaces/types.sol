@@ -40,6 +40,7 @@ struct PaymentInfo {
     address to;
     uint256 blockNumber;
     IERC20 tokenAddress;
+    uint256 value;
 }
 
 /**
