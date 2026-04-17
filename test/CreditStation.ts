@@ -19,16 +19,50 @@ describe("CreditStation", () => {
         const price = await creditStation.getPrice(token);
         const schain = "d2-chain";
         const schainHash = await creditStation.toSchainHash(schain);
-        await token.mint(user, price);
-        await token.connect(user).approve(creditStation, price);
-        const buyTransaction = await creditStation.connect(user).buy(schain, user, token);
+        const value = 1n;
+        await token.mint(user, price * value);
+        await token.connect(user).approve(creditStation, price * value);
+        const buyTransaction = await creditStation.connect(user).buy(schain, user, token, value);
         await buyTransaction.should.changeTokenBalance(
                 token,
                 await creditStation.receiver(),
-                price);
+                price * value);
         await buyTransaction
             .should.emit(creditStation, "PaymentReceived")
-            .withArgs(1n, schainHash, user, user, token);
+            .withArgs(1n, schainHash, user, user, token, value);
+    });
+
+    it("should allow to pay for multiple credits", async () => {
+        const [,,user] = await ethers.getSigners();
+        const { creditStation, token } = await mainnetWithAllowedToken();
+        const price = await creditStation.getPrice(token);
+        const schain = "d2-chain";
+        const schainHash = await creditStation.toSchainHash(schain);
+        const value = 3n;
+        const totalCost = price * value;
+        await token.mint(user, totalCost);
+        await token.connect(user).approve(creditStation, totalCost);
+        const buyTransaction = await creditStation.connect(user).buy(schain, user, token, value);
+        await buyTransaction.should.changeTokenBalance(
+                token,
+                await creditStation.receiver(),
+                totalCost);
+        await buyTransaction
+            .should.emit(creditStation, "PaymentReceived")
+            .withArgs(1n, schainHash, user, user, token, value);
+        const paymentInfo = await creditStation.getPaymentInfo(1n);
+        paymentInfo.value.should.be.equal(value);
+    });
+
+    it("should reject zero value purchase", async () => {
+        const [,,user] = await ethers.getSigners();
+        const { creditStation, token } = await mainnetWithAllowedToken();
+        const schain = "d2-chain";
+        await creditStation.connect(user).buy(schain, user, token, 0n)
+            .should.be.revertedWithCustomError(
+                creditStation,
+                "ValueIsZero"
+            );
     });
 
     it("should get correct payment info", async () => {
@@ -37,18 +71,19 @@ describe("CreditStation", () => {
         const price = await creditStation.getPrice(token);
         const schain = "d2-chain";
         const schainHash = await creditStation.toSchainHash(schain);
-        await token.mint(user, price * 2n);
-        await token.connect(user).approve(creditStation, price * 2n);
+        const value = 1n;
+        await token.mint(user, price * value * 2n);
+        await token.connect(user).approve(creditStation, price * value * 2n);
         expect(await creditStation.getPaymentIds(user.address, 0n, 2n**256n - 1n)).to.deep.equal([]);
 
-        const buyTransaction = await creditStation.connect(user).buy(schain, user, token);
+        const buyTransaction = await creditStation.connect(user).buy(schain, user, token, value);
         await buyTransaction.should.changeTokenBalance(
                 token,
                 await creditStation.receiver(),
-                price);
+                price * value);
         await buyTransaction
             .should.emit(creditStation, "PaymentReceived")
-            .withArgs(1n, schainHash, user, user, token);
+            .withArgs(1n, schainHash, user, user, token, value);
         const paymentId = 1n;
         const paymentInfo = await creditStation.getPaymentInfo(paymentId);
         paymentInfo.schainHash.should.be.equal(schainHash);
@@ -57,7 +92,7 @@ describe("CreditStation", () => {
         let lastPaymentId = await creditStation.getLastPayment(user.address);
         lastPaymentId.should.be.equal(paymentId);
 
-        await creditStation.connect(user).buy(schain, user, token);
+        await creditStation.connect(user).buy(schain, user, token, value);
 
         lastPaymentId = await creditStation.getLastPayment(user.address);
         lastPaymentId.should.be.equal(paymentId + 1n);
@@ -89,5 +124,39 @@ describe("CreditStation", () => {
                 "PaymentIdDoesNotExist"
             )
             .withArgs(nonExistingPaymentId);
+    });
+
+    it("should set payment ID offset", async () => {
+        const [,,user] = await ethers.getSigners();
+        const { creditStation, token } = await mainnetWithAllowedToken();
+        const price = await creditStation.getPrice(token);
+        const schain = "d2-chain";
+        const value = 1n;
+        const sourceId = 1;
+        const idOffset = 1000n;
+        const expectedFirstId = (BigInt(sourceId) << 248n) | idOffset;
+
+        await creditStation.setPaymentIdOffset(sourceId, idOffset);
+
+        await token.mint(user, price * value);
+        await token.connect(user).approve(creditStation, price * value);
+        await creditStation.connect(user).buy(schain, user, token, value);
+
+        const lastPaymentId = await creditStation.getLastPaymentId();
+        lastPaymentId.should.be.equal(expectedFirstId);
+
+        const paymentInfo = await creditStation.getPaymentInfo(expectedFirstId);
+        paymentInfo.from.should.be.equal(user.address);
+        paymentInfo.value.should.be.equal(value);
+    });
+
+    it("should emit PaymentIdOffsetSet event", async () => {
+        const { creditStation } = await mainnetWithAllowedToken();
+        const sourceId = 2;
+        const idOffset = 500n;
+
+        await creditStation.setPaymentIdOffset(sourceId, idOffset)
+            .should.emit(creditStation, "PaymentIdOffsetSet")
+            .withArgs(sourceId, idOffset);
     });
 });
