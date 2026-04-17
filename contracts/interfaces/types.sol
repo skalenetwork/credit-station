@@ -29,10 +29,6 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 type PaymentId is uint256;
 type SchainHash is bytes32;
 
-using {
-    _paymentIdLess as <
-} for PaymentId global;
-
 
 struct PaymentInfo {
     SchainHash schainHash;
@@ -41,14 +37,4 @@ struct PaymentInfo {
     uint256 blockNumber;
     IERC20 tokenAddress;
     uint256 value;
-}
-
-/**
- * @notice Checks if one PaymentId is less than another
- * @param a The first PaymentId
- * @param b The second PaymentId
- * @return less True if `a` is less than `b`, false otherwise
- */
-function _paymentIdLess(PaymentId a, PaymentId b) pure returns (bool less) {
-    return PaymentId.unwrap(a) < PaymentId.unwrap(b);
 }
