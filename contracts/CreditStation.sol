@@ -65,12 +65,14 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     /// @param from The address of the payer
     /// @param to The address of the credits receiver
     /// @param tokenAddress The address of the token used for payment
+    /// @param value The amount of credits purchased in wei
     event PaymentReceived(
         PaymentId indexed id,
         SchainHash indexed schainHash,
         address indexed from,
         address to,
-        IERC20 tokenAddress
+        IERC20 tokenAddress,
+        uint256 value
     );
 
     /// @notice Emitted when a token is allowed for payment
@@ -89,11 +91,17 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     /// @param newReceiver The new receiver address
     event ReceiverWasChanged(address indexed oldReceiver, address indexed newReceiver);
 
+    /// @notice Emitted when the payment ID offset is set
+    /// @param sourceId The source identifier
+    /// @param idOffset The initial offset for payment IDs
+    event PaymentIdOffsetSet(uint8 sourceId, uint248 idOffset);
+
     error TokenIsNotAccepted(IERC20 token);
     error TokenTransferFailed(IERC20 token, address from, uint256 amount);
     error NoPaymentsForUser(address user);
     error InvalidIndices();
     error PaymentIdDoesNotExist(PaymentId paymentId);
+    error ValueIsZero();
 
     /// @notice Constructor
     /// @param accessManagerAddress The address of the Access Manager contract
@@ -109,15 +117,18 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     /// @param schainName The name of the schain
     /// @param purchaser The address purchased credits will be sent to
     /// @param token The address of the token to pay with
+    /// @param value The amount of credits to purchase in wei
     function buy(
         string calldata schainName,
         address purchaser,
-        IERC20 token
+        IERC20 token,
+        uint256 value
     )
         external
         whenNotPaused
         override
     {
+        require(value > 0, ValueIsZero());
         (bool accepted, uint256 price) = _prices.tryGet(address(token));
         require(accepted, TokenIsNotAccepted(token));
         PaymentId currentPaymentId = _nextPaymentId;
@@ -128,7 +139,8 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
             schainHash: toSchainHash(schainName),
             from: msg.sender,
             to: purchaser,
-            tokenAddress: token
+            tokenAddress: token,
+            value: value
         });
 
         _paymentsByUser.add(msg.sender, currentPaymentId);
@@ -137,10 +149,12 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
             from: msg.sender,
             to: purchaser,
             blockNumber: block.number,
-            tokenAddress: token
+            tokenAddress: token,
+            value: value
         });
 
-        require(token.transferFrom(msg.sender, receiver, price), TokenTransferFailed(token, msg.sender, price));
+        uint256 totalCost = price * value;
+        require(token.transferFrom(msg.sender, receiver, totalCost), TokenTransferFailed(token, msg.sender, totalCost));
     }
 
     /// @notice Pauses the contract
@@ -176,6 +190,14 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
         require(newReceiver != address(0), AddressIsNotSet());
         emit ReceiverWasChanged(receiver, newReceiver);
         receiver = newReceiver;
+    }
+
+    /// @notice Sets the payment ID offset
+    /// @param sourceId The source identifier (highest 8 bits of payment ID)
+    /// @param idOffset The initial offset for payment IDs
+    function setPaymentIdOffset(uint8 sourceId, uint248 idOffset) external override restricted {
+        _nextPaymentId = PaymentId.wrap((uint256(sourceId) << 248) | uint256(idOffset));
+        emit PaymentIdOffsetSet(sourceId, idOffset);
     }
 
     /// @notice Sets the version of the contract
@@ -241,7 +263,7 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
         PaymentId paymentId
     ) external view override returns (PaymentInfo memory payment) {
         require(
-            paymentId < _nextPaymentId && PaymentId.wrap(0) < paymentId,
+            paymentsInfo[paymentId].blockNumber != 0,
             PaymentIdDoesNotExist(paymentId)
         );
         return paymentsInfo[paymentId];
