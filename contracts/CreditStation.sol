@@ -94,7 +94,7 @@ contract CreditStation is AccessManaged, Pausable, IVersioned, ICreditStation {
     /// @notice Emitted when the payment ID offset is set
     /// @param sourceId The source identifier
     /// @param idOffset The initial offset for payment IDs
-    event PaymentIdOffsetSet(uint8 sourceId, uint248 idOffset);
+    event PaymentIdOffsetSet(uint8 indexed sourceId, uint248 indexed idOffset);
 
     error TokenIsNotAccepted(IERC20 token);
     error TokenTransferFailed(IERC20 token, address from, uint256 amount);
