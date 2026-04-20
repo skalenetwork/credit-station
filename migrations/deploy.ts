@@ -48,8 +48,8 @@ export const deployCreditStation = async (
     if (sourceId !== undefined && idOffset !== undefined) {
         console.log(chalk.gray(`Setting payment ID offset: sourceId=${sourceId}, idOffset=${idOffset}`));
         const offsetResponse = await creditStation.setPaymentIdOffset(
-            parseInt(sourceId, 10),
-            BigInt(idOffset)
+            sourceId,
+            idOffset
         );
         await offsetResponse.wait();
     } else if (sourceId !== undefined || idOffset !== undefined) {
