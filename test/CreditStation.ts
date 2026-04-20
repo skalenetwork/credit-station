@@ -132,9 +132,9 @@ describe("CreditStation", () => {
         const price = await creditStation.getPrice(token);
         const schain = "d2-chain";
         const value = 1n;
-        const sourceId = 1;
+        const sourceId = 1n;
         const idOffset = 1000n;
-        const expectedFirstId = (BigInt(sourceId) << 248n) | idOffset;
+        const expectedFirstId = (sourceId << 248n) | idOffset;
 
         await creditStation.setPaymentIdOffset(sourceId, idOffset);
 
@@ -152,7 +152,7 @@ describe("CreditStation", () => {
 
     it("should emit PaymentIdOffsetSet event", async () => {
         const { creditStation } = await mainnetWithAllowedToken();
-        const sourceId = 2;
+        const sourceId = 2n;
         const idOffset = 500n;
 
         await creditStation.setPaymentIdOffset(sourceId, idOffset)
