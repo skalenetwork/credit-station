@@ -42,6 +42,20 @@ export const deployCreditStation = async (
     ) as CreditStation;
     const response = await creditStation.setVersion(version);
     await response.wait();
+
+    const sourceId = process.env["SOURCE_ID"];
+    const idOffset = process.env["ID_OFFSET"];
+    if (sourceId !== undefined && idOffset !== undefined) {
+        console.log(chalk.gray(`Setting payment ID offset: sourceId=${sourceId}, idOffset=${idOffset}`));
+        const offsetResponse = await creditStation.setPaymentIdOffset(
+            sourceId,
+            idOffset
+        );
+        await offsetResponse.wait();
+    } else if (sourceId !== undefined || idOffset !== undefined) {
+        throw new Error("Both SOURCE_ID and ID_OFFSET must be set together");
+    }
+
     return creditStation;
 }
 

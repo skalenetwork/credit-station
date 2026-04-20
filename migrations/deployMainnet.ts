@@ -6,6 +6,8 @@ import { deployAccessManager, deployCreditStation, storeAddresses, successCode, 
 
 const OWNER_PARAMETER = "OWNER";
 const RECEIVER_PARAMETER = "RECEIVER";
+const SOURCE_ID_PARAMETER = "SOURCE_ID";
+const ID_OFFSET_PARAMETER = "ID_OFFSET";
 
 export const deployMainnet = async (owner: AddressLike, receiver: AddressLike, version: string) => {
     const accessManager = await deployAccessManager(owner);
@@ -32,6 +34,12 @@ const main = async () => {
     } else {
         console.log(chalk.yellow(`RECEIVER is not set`));
         console.log(chalk.yellow(`Using deployer address: ${receiver}`));
+    }
+    if (process.env[SOURCE_ID_PARAMETER] && process.env[ID_OFFSET_PARAMETER]) {
+        console.log(chalk.gray(`SOURCE_ID is set to ${process.env[SOURCE_ID_PARAMETER]}`));
+        console.log(chalk.gray(`ID_OFFSET is set to ${process.env[ID_OFFSET_PARAMETER]}`));
+    } else if (!process.env[SOURCE_ID_PARAMETER] && !process.env[ID_OFFSET_PARAMETER]) {
+        console.log(chalk.yellow(`SOURCE_ID and ID_OFFSET are not set, skipping payment ID offset`));
     }
 
     const { accessManager, creditStation } = await deployMainnet(deployer, receiver, await getVersion());

@@ -37,10 +37,12 @@ interface ICreditStation {
     /// @param schainName The name of the schain
     /// @param purchaser The address purchased credits will be sent to
     /// @param token The address of the token to pay with
+    /// @param value The amount of credits to purchase in wei
     function buy(
         string calldata schainName,
         address purchaser,
-        IERC20 token
+        IERC20 token,
+        uint256 value
     ) external;
     /// @notice Pauses the contract
     function pause() external;
@@ -49,6 +51,10 @@ interface ICreditStation {
     /// @param token The address of the token
     /// @param price The price of the credits batch in the specified token
     function setPrice(IERC20 token, uint256 price) external;
+    /// @notice Sets the payment ID offset
+    /// @param sourceId The source identifier (highest 8 bits of payment ID)
+    /// @param idOffset The initial offset for payment IDs
+    function setPaymentIdOffset(uint8 sourceId, uint248 idOffset) external;
     /// @notice Sets the receiver address
     /// @param newReceiver The new receiver address
     function setReceiver(address newReceiver) external;
