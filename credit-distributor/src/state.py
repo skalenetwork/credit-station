@@ -27,30 +27,26 @@ logger = logging.getLogger(__name__)
 
 
 class State(BaseModel):
-    from_block: int
+    from_blocks: dict[str, int]
 
 
 class StateManager:
     def __init__(self, state_file: str | Path):
-        self.state_file = Path(state_file) if isinstance(state_file, str) else state_file
+        self.state_file = Path(state_file)
 
-    def load(self, initial_from_block: int) -> State:
+    def load(self, initial_from_blocks: dict[str, int]) -> State:
         if self.state_file.exists():
             try:
-                data = json.loads(self.state_file.read_text())
+                stored = State(**json.loads(self.state_file.read_text())).from_blocks
                 logger.info(f'Loaded state from {self.state_file}')
-                return State(**data)
+                from_blocks = {n: stored.get(n, b) for n, b in initial_from_blocks.items()}
+                return State(from_blocks=from_blocks)
             except Exception as e:
                 logger.warning(
-                    f'Failed to load state from {self.state_file}: {e}. Using initial value.'
+                    f'Failed to load state from {self.state_file}: {e}. Using initial values.'
                 )
-        logger.info(f'Creating new state with from_block={initial_from_block}')
-        return State(from_block=initial_from_block)
+        logger.info(f'Creating new state with from_blocks={initial_from_blocks}')
+        return State(from_blocks=dict(initial_from_blocks))
 
     def save(self, state: State) -> None:
-        try:
-            self.state_file.write_text(state.model_dump_json(indent=2))
-            logger.debug(f'Saved state to {self.state_file}')
-        except Exception as e:
-            logger.error(f'Failed to save state to {self.state_file}: {e}')
-            raise
+        self.state_file.write_text(state.model_dump_json(indent=2))

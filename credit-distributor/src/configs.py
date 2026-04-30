@@ -17,8 +17,6 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# cspell:words customise
-
 import os
 
 from eth_typing import HexStr
@@ -34,14 +32,16 @@ from skale.types.schain import SchainName
 CONFIG_FILEPATH = os.path.join(os.path.dirname(__file__), os.pardir, 'config.toml')
 
 
-class Endpoints(BaseModel):
-    mainnet: str
-    schain: str
+class Source(BaseModel):
+    name: str
+    endpoint: str
+    contract: str
+    from_block: int
 
 
-class Contracts(BaseModel):
-    mainnet: str
-    schain: str
+class Destination(BaseModel):
+    endpoint: str
+    contract: str
 
 
 class Agent(BaseModel):
@@ -51,7 +51,6 @@ class Agent(BaseModel):
 
 class General(BaseModel):
     schain_name: SchainName
-    from_block: int
     eth_private_key: HexStr
     state_file: str = 'state.json'
 
@@ -60,8 +59,8 @@ class Config(BaseSettings):
     model_config = SettingsConfigDict(toml_file=CONFIG_FILEPATH)
 
     general: General
-    endpoints: Endpoints
-    contracts: Contracts
+    destination: Destination
+    sources: list[Source]
     agent: Agent = Agent()
 
     @classmethod

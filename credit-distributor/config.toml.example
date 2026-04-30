@@ -1,15 +1,27 @@
 [general]
 schain_name = 'test' # required
 eth_private_key = '0x0' # required
-from_block = 1234 # required
+state_file = 'state.json' # optional
 
-[contracts]
-mainnet = '0x0' # required
-schain = '0x0' # required
+[destination]
+endpoint = 'https://example.com' # required - destination schain RPC
+contract = '0x0' # required - Ledger contract address on destination schain
 
-[endpoints]
-mainnet = 'https://example.com' # required
-schain = 'https://example.com' # required
+# One [[sources]] entry per CreditStation deployment to monitor.
+# Each deployment must have been initialized with a unique on-chain `sourceId`
+# (see CreditStation.setPaymentIdOffset). The `name` is an off-chain label
+# used as a key in the state file and in logs.
+[[sources]]
+name = 'ethereum' # required - unique label
+endpoint = 'https://example.com' # required - source chain RPC
+contract = '0x0' # required - CreditStation contract address
+from_block = 1234 # required - initial block to start scanning from
+
+[[sources]]
+name = 'base'
+endpoint = 'https://example.com'
+contract = '0x0'
+from_block = 5678
 
 [agent] # optional
 loop_sleep = 120 # optional
