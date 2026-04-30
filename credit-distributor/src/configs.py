@@ -49,10 +49,6 @@ class Agent(BaseModel):
     exception_sleep: int = 10
 
 
-class Payment(BaseModel):
-    value_eth: int = 1
-
-
 class General(BaseModel):
     schain_name: SchainName
     from_block: int
@@ -67,7 +63,6 @@ class Config(BaseSettings):
     endpoints: Endpoints
     contracts: Contracts
     agent: Agent = Agent()
-    payment: Payment = Payment()
 
     @classmethod
     def settings_customise_sources(

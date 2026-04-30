@@ -14,7 +14,3 @@ schain = 'https://example.com' # required
 [agent] # optional
 loop_sleep = 120 # optional
 exception_sleep = 10 # optional
-
-[payment] # optional
-value_eth = 1 # optional
-value_wei = 10000 # optional

@@ -2,7 +2,7 @@
 name = "credit-distributor"
 version = "0.0.1"
 requires-python = ">=3.13"
-dependencies = ["skale.py==7.9dev0", "pydantic-settings==2.12.0"]
+dependencies = ["skale.py==7.14dev0", "pydantic-settings==2.12.0"]
 
 [project.optional-dependencies]
 dev = ["ruff==0.14.5", "mypy==1.7.1"]
