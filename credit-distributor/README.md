@@ -18,9 +18,9 @@ Configuration is loaded from a local TOML file.
 
 2. Edit `config.toml`:
 
-   - `[general]` — destination `schain_name` and the distributor's `eth_private_key` (used to call `Ledger.fulfill` on the destination schain).
-   - `[destination]` — destination schain `endpoint` and `Ledger` `contract` address.
-   - `[[sources]]` — one entry per `CreditStation` deployment. Repeat the block for each source chain. Each needs a unique `name` (used as a state-file key), the source-chain `endpoint`, the `CreditStation` `contract` address, and an initial `from_block` to scan from.
+   * `[general]` — destination `schain_name` and the distributor's `eth_private_key` (used to call `Ledger.fulfill` on the destination schain).
+   * `[destination]` — destination schain `endpoint` and `Ledger` `contract` address.
+   * `[[sources]]` — one entry per `CreditStation` deployment. Repeat the block for each source chain. Each needs a unique `name` (used as a state-file key), the source-chain `endpoint`, the `CreditStation` `contract` address, and an initial `from_block` to scan from.
 
 See `config.toml.example` for a complete annotated sample with two sources.
 
