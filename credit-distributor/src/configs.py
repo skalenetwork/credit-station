@@ -29,7 +29,7 @@ from pydantic_settings import (
     SettingsConfigDict,
     TomlConfigSettingsSource,
 )
-from skale.types.schain import SchainName
+from skale_core.types import SchainName
 
 CONFIG_FILEPATH = os.path.join(os.path.dirname(__file__), os.pardir, 'config.toml')
 
@@ -39,6 +39,7 @@ class Source(BaseModel):
     endpoint: str
     contract: str
     from_block: int
+    source_id: int | None = None
 
 
 class Destination(BaseModel):

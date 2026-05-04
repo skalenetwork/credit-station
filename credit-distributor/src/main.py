@@ -31,6 +31,18 @@ from src.state import State, StateManager
 
 logger = logging.getLogger(__name__)
 
+SOURCE_ID_SHIFT = 248
+SOURCE_ID_MAX = 0xFF
+
+
+def extract_source_id(payment_id: int) -> int:
+    return (payment_id >> SOURCE_ID_SHIFT) & SOURCE_ID_MAX
+
+
+def resolve_source_id(mainnet_cs: MainnetCreditStation) -> int:
+    last_payment_id = mainnet_cs.credit_station.contract.functions.getLastPaymentId().call()
+    return extract_source_id(last_payment_id)
+
 
 def run_distributor() -> None:
     config = get_config()
@@ -46,6 +58,10 @@ def run_distributor() -> None:
         source.name: MainnetCreditStation(source.endpoint, source.contract)
         for source in config.sources
     }
+
+    for source in config.sources:
+        source.source_id = resolve_source_id(source_clients[source.name])
+        logger.info(f'[{source.name}] Resolved on-chain source_id={source.source_id}')
 
     while True:
         logger.info('Starting credit distribution cycle')
