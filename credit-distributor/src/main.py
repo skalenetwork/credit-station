@@ -32,11 +32,10 @@ from src.state import State, StateManager
 logger = logging.getLogger(__name__)
 
 SOURCE_ID_SHIFT = 248
-SOURCE_ID_MAX = 0xFF
 
 
 def extract_source_id(payment_id: int) -> int:
-    return (payment_id >> SOURCE_ID_SHIFT) & SOURCE_ID_MAX
+    return payment_id >> SOURCE_ID_SHIFT
 
 
 def resolve_source_id(mainnet_cs: MainnetCreditStation) -> int:
