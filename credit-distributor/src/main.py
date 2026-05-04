@@ -26,73 +26,94 @@ from skale.utils.helper import init_default_logger
 from skale.utils.web3_utils import init_web3
 from skale.wallets import Web3Wallet
 
-from src.configs import Config, get_config
+from src.configs import Config, Source, get_config
 from src.state import State, StateManager
 
 logger = logging.getLogger(__name__)
+
+SOURCE_ID_SHIFT = 248
+
+
+def extract_source_id(payment_id: int) -> int:
+    return payment_id >> SOURCE_ID_SHIFT
+
+
+def resolve_source_id(mainnet_cs: MainnetCreditStation) -> int:
+    last_payment_id = mainnet_cs.credit_station.contract.functions.getLastPaymentId().call()
+    return extract_source_id(last_payment_id)
 
 
 def run_distributor() -> None:
     config = get_config()
     state_manager = StateManager(state_file=config.general.state_file)
-    state = state_manager.load(config.general.from_block)
+    state = state_manager.load({s.name: s.from_block for s in config.sources})
 
-    schain_web3 = init_web3(config.endpoints.schain)
+    schain_web3 = init_web3(config.destination.endpoint)
     schain_wallet = Web3Wallet(config.general.eth_private_key, schain_web3)
-    mainnet_cs = MainnetCreditStation(config.endpoints.mainnet, config.contracts.mainnet)
-    schain_cs = SchainCreditStation(config.endpoints.schain, config.contracts.schain, schain_wallet)
+    schain_cs = SchainCreditStation(
+        config.destination.endpoint, config.destination.contract, schain_wallet
+    )
+    source_clients = {
+        source.name: MainnetCreditStation(source.endpoint, source.contract)
+        for source in config.sources
+    }
+
+    for source in config.sources:
+        source.source_id = resolve_source_id(source_clients[source.name])
+        logger.info(f'[{source.name}] Resolved on-chain source_id={source.source_id}')
+
     while True:
-        try:
-            logging.info('Starting credit distribution cycle')
-            state = distribute_credits(mainnet_cs, schain_cs, config, state)
-            state_manager.save(state)
-            logger.info(f'Sleeping for {config.agent.loop_sleep} seconds before next cycle')
-            sleep(config.agent.loop_sleep)
-        except Exception as e:
-            logging.exception(f'Error during credit distribution cycle: {e}')
-            logger.info(f'Sleeping for {config.agent.exception_sleep} seconds before retrying')
-            sleep(config.agent.exception_sleep)
+        logger.info('Starting credit distribution cycle')
+        for source in config.sources:
+            try:
+                state = distribute_credits_for_source(
+                    source, source_clients[source.name], schain_cs, config, state
+                )
+                state_manager.save(state)
+            except Exception as e:
+                logger.exception(
+                    f'Error processing source {source.name!r}: {e}; continuing with next'
+                )
+        logger.info(f'Sleeping for {config.agent.loop_sleep} seconds before next cycle')
+        sleep(config.agent.loop_sleep)
 
 
-def distribute_credits(
+def distribute_credits_for_source(
+    source: Source,
     mainnet_cs: MainnetCreditStation,
     schain_cs: SchainCreditStation,
     config: Config,
     state: State,
 ) -> State:
+    from_block = state.from_blocks[source.name]
+    logger.info(f'[{source.name}] Fetching events from block {from_block}')
     all_events = mainnet_cs.credit_station.get_payment_received_events(
-        from_block=state.from_block, schain_name=config.general.schain_name
+        from_block=from_block, schain_name=config.general.schain_name
     )
-    last_block = state.from_block
     for event in all_events:
-        fulfill_payment(event, schain_cs, config)
+        fulfill_payment(source, event, schain_cs)
 
-    last_block_with_event = 0
-    if len(all_events) != 0:
-        last_block_with_event = all_events[-1]['block_number']
+    if all_events:
+        state.from_blocks[source.name] = all_events[-1]['block_number'] + 1
     else:
-        logger.info('No new PaymentReceived events found.')
-    state.from_block = max(last_block, last_block_with_event + 1)
+        logger.info(f'[{source.name}] No new PaymentReceived events found.')
     return state
 
 
-def get_payment_wei_value(config: Config) -> int:
-    return config.payment.value_eth * 10**18
-
-
 def fulfill_payment(
-    event: PaymentReceivedEvent, schain_cs: SchainCreditStation, config: Config
+    source: Source,
+    event: PaymentReceivedEvent,
+    schain_cs: SchainCreditStation,
 ) -> None:
-    logger.info(f'Checking payment: {event["payment_id"]}')
-    is_fulfilled = schain_cs.ledger.is_fulfilled(event['payment_id'])
+    payment_id = event['payment_id']
+    logger.info(f'[{source.name}] Checking payment: {payment_id}')
+    is_fulfilled = schain_cs.ledger.is_fulfilled(payment_id)
     if not is_fulfilled:
-        logger.info(f'Fulfilling payment: {event["payment_id"]}')
-        schain_cs.ledger.fulfill(
-            event['payment_id'], event['to_address'], value=get_payment_wei_value(config)
-        )
-        logger.info(f'Payment {event["payment_id"]} fulfilled successfully.')
+        logger.info(f'[{source.name}] Fulfilling payment: {payment_id}')
+        schain_cs.ledger.fulfill(payment_id, event['to_address'], value=event['value'])
+        logger.info(f'[{source.name}] Payment {payment_id} fulfilled successfully.')
     else:
-        logger.debug(f'Payment {event["payment_id"]} is already fulfilled.')
+        logger.debug(f'[{source.name}] Payment {payment_id} is already fulfilled.')
 
 
 if __name__ == '__main__':

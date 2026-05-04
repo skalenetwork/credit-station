@@ -29,19 +29,22 @@ from pydantic_settings import (
     SettingsConfigDict,
     TomlConfigSettingsSource,
 )
-from skale.types.schain import SchainName
+from skale_core.types import SchainName
 
 CONFIG_FILEPATH = os.path.join(os.path.dirname(__file__), os.pardir, 'config.toml')
 
 
-class Endpoints(BaseModel):
-    mainnet: str
-    schain: str
+class Source(BaseModel):
+    name: str
+    endpoint: str
+    contract: str
+    from_block: int
+    source_id: int | None = None
 
 
-class Contracts(BaseModel):
-    mainnet: str
-    schain: str
+class Destination(BaseModel):
+    endpoint: str
+    contract: str
 
 
 class Agent(BaseModel):
@@ -49,13 +52,8 @@ class Agent(BaseModel):
     exception_sleep: int = 10
 
 
-class Payment(BaseModel):
-    value_eth: int = 1
-
-
 class General(BaseModel):
     schain_name: SchainName
-    from_block: int
     eth_private_key: HexStr
     state_file: str = 'state.json'
 
@@ -64,10 +62,9 @@ class Config(BaseSettings):
     model_config = SettingsConfigDict(toml_file=CONFIG_FILEPATH)
 
     general: General
-    endpoints: Endpoints
-    contracts: Contracts
+    destination: Destination
+    sources: list[Source]
     agent: Agent = Agent()
-    payment: Payment = Payment()
 
     @classmethod
     def settings_customise_sources(

@@ -17,7 +17,6 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import json
 import logging
 from pathlib import Path
 
@@ -27,30 +26,24 @@ logger = logging.getLogger(__name__)
 
 
 class State(BaseModel):
-    from_block: int
+    from_blocks: dict[str, int]
 
 
 class StateManager:
     def __init__(self, state_file: str | Path):
-        self.state_file = Path(state_file) if isinstance(state_file, str) else state_file
+        self.state_file = Path(state_file)
 
-    def load(self, initial_from_block: int) -> State:
+    def load(self, initial_from_blocks: dict[str, int]) -> State:
+        from_blocks = dict(initial_from_blocks)
         if self.state_file.exists():
-            try:
-                data = json.loads(self.state_file.read_text())
-                logger.info(f'Loaded state from {self.state_file}')
-                return State(**data)
-            except Exception as e:
-                logger.warning(
-                    f'Failed to load state from {self.state_file}: {e}. Using initial value.'
-                )
-        logger.info(f'Creating new state with from_block={initial_from_block}')
-        return State(from_block=initial_from_block)
+            stored = State.model_validate_json(self.state_file.read_text()).from_blocks
+            logger.info(f'Loaded state from {self.state_file}')
+            for name in from_blocks:
+                if name in stored:
+                    from_blocks[name] = stored[name]
+        else:
+            logger.info(f'Creating new state with from_blocks={from_blocks}')
+        return State(from_blocks=from_blocks)
 
     def save(self, state: State) -> None:
-        try:
-            self.state_file.write_text(state.model_dump_json(indent=2))
-            logger.debug(f'Saved state to {self.state_file}')
-        except Exception as e:
-            logger.error(f'Failed to save state to {self.state_file}: {e}')
-            raise
+        self.state_file.write_text(state.model_dump_json(indent=2))
