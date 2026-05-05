@@ -26,3 +26,4 @@ from_block = 5678
 [agent] # optional
 loop_sleep = 120 # optional
 exception_sleep = 10 # optional
+events_chunk_size = 2000 # optional - block range size for event log queries

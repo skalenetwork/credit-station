@@ -50,6 +50,7 @@ class Destination(BaseModel):
 class Agent(BaseModel):
     loop_sleep: int = 120
     exception_sleep: int = 10
+    events_chunk_size: int = 2000
 
 
 class General(BaseModel):
