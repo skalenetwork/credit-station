@@ -88,7 +88,9 @@ def distribute_credits_for_source(
     from_block = state.from_blocks[source.name]
     logger.info(f'[{source.name}] Fetching events from block {from_block}')
     all_events = mainnet_cs.credit_station.get_payment_received_events(
-        from_block=from_block, schain_name=config.general.schain_name
+        from_block=from_block,
+        schain_name=config.general.schain_name,
+        chunk_size=config.agent.events_chunk_size,
     )
     for event in all_events:
         fulfill_payment(source, event, schain_cs)
