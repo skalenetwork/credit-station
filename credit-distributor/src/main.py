@@ -93,7 +93,7 @@ def distribute_credits_for_source(
         chunk_size=config.agent.events_chunk_size,
     )
     for event in all_events:
-        fulfill_payment(source, event, schain_cs)
+        fulfill_payment(source, event, schain_cs, config.destination.credit_decimals)
 
     if all_events:
         state.from_blocks[source.name] = all_events[-1]['block_number'] + 1
@@ -106,13 +106,15 @@ def fulfill_payment(
     source: Source,
     event: PaymentReceivedEvent,
     schain_cs: SchainCreditStation,
+    credit_decimals: int,
 ) -> None:
     payment_id = event['payment_id']
     logger.info(f'[{source.name}] Checking payment: {payment_id}')
     is_fulfilled = schain_cs.ledger.is_fulfilled(payment_id)
     if not is_fulfilled:
-        logger.info(f'[{source.name}] Fulfilling payment: {payment_id}')
-        schain_cs.ledger.fulfill(payment_id, event['to_address'], value=event['value'])
+        amount = event['value'] * (10 ** credit_decimals)
+        logger.info(f'[{source.name}] Fulfilling payment: {payment_id} with amount {amount} wei')
+        schain_cs.ledger.fulfill(payment_id, event['to_address'], value=amount)
         logger.info(f'[{source.name}] Payment {payment_id} fulfilled successfully.')
     else:
         logger.debug(f'[{source.name}] Payment {payment_id} is already fulfilled.')
