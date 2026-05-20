@@ -45,6 +45,7 @@ class Source(BaseModel):
 class Destination(BaseModel):
     endpoint: str
     contract: str
+    credit_decimals: int = 18
 
 
 class Agent(BaseModel):
