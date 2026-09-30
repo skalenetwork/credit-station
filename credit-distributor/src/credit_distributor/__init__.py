@@ -153,6 +153,8 @@ class Distributor:
             if info.schain_hash == schain_hash and (reason := self.fulfill(payment, info)):
                 self.state.parked[payment] = reason
                 logger.error('%s: parked payment %#x: %s', source.name, payment, reason)
+            else:
+                self.state.parked.pop(payment, None)
             cursor.next_id = PaymentId(payment + 1)
             self.state.save(self.config.state_file)
 

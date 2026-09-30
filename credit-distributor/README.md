@@ -26,7 +26,7 @@ The signing key is read from `key_file` (a compose secret by default). Keep only
 
 Alert on `ERROR credit_distributor` lines and on `already fulfilled` warnings. skale.py logs transient dry run failures at ERROR under its own logger. RPC errors log the full endpoint URL, so treat the container logs like `config.toml`.
 
-To replay a parked payment, raise `max_credits_per_payment` first if it was over the cap and run `docker compose stop`. As root, edit `state.json` in the `state` volume: set that source's `next_id` to the parked id and remove its `parked` entry, then run `docker compose start`. Fulfilled payments in between are skipped, and other parked ones are retried.
+To replay a parked payment, raise `max_credits_per_payment` first if it was over the cap and run `docker compose stop`. As root, edit `state.json` in the `state` volume: set that source's `next_id` to the parked id, then run `docker compose start`. Fulfilled payments in between are skipped, other parked ones are retried, and `parked` keeps only those that fail again.
 
 ## Running
 

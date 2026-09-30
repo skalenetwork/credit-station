@@ -213,6 +213,17 @@ def test_restart_does_not_pay_twice(chain: Chain, distributor: Distributor, cycl
     assert restarted.state == distributor.state
 
 
+def test_replay_clears_parked(chain: Chain, distributor: Distributor, cycle: Cycle) -> None:
+    payment = chain.buy(CAP + 1)
+    cycle(distributor)
+    distributor.state.sources[NAME].next_id = payment
+    distributor.state.save(distributor.config.state_file)
+    replay = Distributor(distributor.config.model_copy(update={'max_credits_per_payment': CAP + 1}))
+    assert cycle(replay) == []
+    assert replay.ledger.is_fulfilled(payment)
+    assert replay.state.parked == {}
+
+
 def test_rejects_foreign_state(chain: Chain, distributor: Distributor, cycle: Cycle) -> None:
     here = Binding(chain_id=chain.w3.eth.chain_id, contract=chain.station.address)
     other = Binding(chain_id=here.chain_id + 1, contract=here.contract)
