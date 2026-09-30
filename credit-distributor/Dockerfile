@@ -1,27 +1,14 @@
-FROM python:3.13.8-slim-trixie AS builder
+FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d AS build
+COPY --from=ghcr.io/astral-sh/uv:0.12.19@sha256:04d046b13e60d6bcec73cbc5e1cad25d680dea90c8573340950a0ac2d1aef424 /uv /bin/uv
+ENV UV_COMPILE_BYTECODE=1 UV_PYTHON_DOWNLOADS=never
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --no-dev --no-install-project
+COPY src src
+RUN uv sync --locked --no-dev --no-editable
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-
-WORKDIR /usr/src
-
-COPY pyproject.toml ./
-
-RUN uv pip install --prerelease=allow --system --no-cache .
-
-FROM python:3.13.8-slim-trixie
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget && \
-    rm -rf /var/lib/apt/lists/*
-
-WORKDIR /usr/src
-
-COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-
-COPY . .
-
-ENV PYTHONPATH="/usr/src:/usr/lib/python3/dist-packages/"
-ENV COLUMNS=80
-
-CMD ["python", "src/main.py"]
+FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d
+RUN install -d -o 65532 -g 65532 /state
+COPY --from=build /app/.venv /app/.venv
+USER 65532:65532
+ENTRYPOINT ["/app/.venv/bin/credit-distributor"]

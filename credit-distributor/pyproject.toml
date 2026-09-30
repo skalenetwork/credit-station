@@ -1,14 +1,18 @@
 [project]
 name = "credit-distributor"
-version = "0.0.1"
-requires-python = ">=3.13"
-dependencies = ["skale.py==7.14dev0", "pydantic-settings==2.12.0"]
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = ["skale.py==7.14dev5", "skale.py-core==7.14dev5", "pydantic>=2.13,<3"]
 
-[project.optional-dependencies]
-dev = ["ruff==0.14.5", "mypy==1.7.1"]
+[project.scripts]
+credit-distributor = "credit_distributor:main"
 
-[tool.uv]
-prerelease = "allow"
+[dependency-groups]
+dev = ["ruff==0.16.9", "mypy==2.3.1", "pytest==9.1.1"]
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"
 
 [tool.ruff]
 line-length = 100
@@ -20,8 +24,4 @@ select = ["E", "W", "F", "I"]
 quote-style = "single"
 
 [tool.mypy]
-python_version = "3.13"
-warn_unused_configs = true
-ignore_missing_imports = true
-warn_return_any = true
-disallow_untyped_defs = true
+strict = true

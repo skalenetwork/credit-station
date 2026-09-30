@@ -1,15 +1,25 @@
 services:
   credit-distributor:
-    image: credit-distributor:latest
+    build: .
     container_name: credit_distributor
-    volumes:
-      - ./config.toml:/app/config.toml:ro
-    build:
-      context: .
-      dockerfile: Dockerfile
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "200m"
     restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    secrets: [distributor_key]
+    volumes:
+      - ./config.toml:/etc/credit-distributor/config.toml:ro
+      - state:/state
+    logging:
+      driver: json-file
+      options:
+        max-size: 200m
+        max-file: '5'
+
+secrets:
+  distributor_key:
+    file: ./distributor_key
+
+volumes:
+  state:

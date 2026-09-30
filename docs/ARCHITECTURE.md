@@ -21,12 +21,12 @@ and the purpose of its main directories.
   - `test/` – Solidity test contracts used by Hardhat tests.
 
 - `/credit-distributor`
-  Python service that listens for `PaymentReceived` events on the mainnet
-  `CreditStation` contract and fulfills corresponding payments on a SKALE
-  chain `Ledger` contract. Contains its own Docker and Python tooling:
+  Python service that reads new payment ids from each source `CreditStation`
+  contract and fulfills them on a SKALE chain `Ledger` contract. Contains its
+  own Docker and Python tooling:
   - `Dockerfile`, `docker-compose.yml` – containerized deployment of the agent.
   - `pyproject.toml` – Python project configuration and dependencies.
-  - `src/` – service implementation (configs, state, main loop).
+  - `src/credit_distributor/__init__.py` – the whole service: config, state and main loop.
 
 - `/data`
   JSON files with deployed contract addresses and related metadata, written by

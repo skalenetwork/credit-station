@@ -25,7 +25,7 @@ Together with the `credit-distributor` off-chain agent, it provides a simple way
 - **Mainnet credit payments:** Accepts ERC-20 payments to buy credits for SKALE chain usage.
 - **Configurable pricing and tokens:** Maintains per-token pricing and a list of accepted payment tokens.
 - **Access-controlled operations:** Uses `CreditStationAccessManager` for role-based admin and agent permissions.
-- **Event-driven fulfillment:** Emits `PaymentReceived` events consumed by `credit-distributor` to fulfill credit purchases on schains.
+- **Id-based fulfillment:** `credit-distributor` reads new payments by id and fulfills them on schains.
 
 Credit station project is part of the [SKALE-expand](https://blog.skale.space/blog/skale-expand-bringing-gas-free-instant-private-execution-to-any-evm-blockchain) vision of SKALE. With the new pricing model, developers can buy credits using their preferred token on the chain where skale-manager is deployed, and use them on SKALE-chains to pay-per-usage on network hubs, instead of having to buy their own chain and paying the monthly rate.
 
@@ -38,7 +38,7 @@ Details about the repository structure can be found in [ARCHITECTURE](./docs/ARC
 - Node.js 22-24 (tested with modern LTS versions)
 - Yarn 4 (enabled via `yarn@4.x.x"` in `package.json`)
 - Docker (optional - for running the `credit-distributor` service via `docker compose`)
-- Python 3.13+ with [uv](https://docs.astral.sh/uv/) for local `credit-distributor` development
+- Python 3.14+ with [uv](https://docs.astral.sh/uv/) for local `credit-distributor` development
 - `slither-analyzer` (installed globally or in a suitable Python environment)
 
 ### Clone and Install
