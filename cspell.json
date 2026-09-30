@@ -10,6 +10,18 @@
         { "name": "python", "path": "./dictionary/python.txt"}
     ],
     "dictionaries": ["domain-terms", "libraries", "names", "skale-terms", "solidity", "python"],
+    "words": [
+        "autouse",
+        "caplog",
+        "dataclass",
+        "dataclasses",
+        "getattr",
+        "keccak",
+        "levelname",
+        "pytest",
+        "rglob",
+        "tomllib"
+    ],
     "ignorePaths": [
         ".yarn",
         "artifacts",
