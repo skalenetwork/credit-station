@@ -1,0 +1,67 @@
+name: credit-distributor
+
+on:
+  push:
+    paths:
+      - .github/workflows/credit-distributor.yml
+      - contracts/**
+      - credit-distributor/**
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up Node
+      uses: actions/setup-node@v7
+      with:
+        node-version: 24.22.3
+        cache: 'yarn'
+
+    - name: Start Hardhat node
+      run: |
+        yarn install
+        yarn compile
+        yarn hardhat node --port 8547 &
+        curl -s --retry 60 --retry-all-errors --retry-delay 1 -H 'Content-Type: application/json' \
+          -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}' http://127.0.0.1:8547
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v10.3.3
+      with:
+        version: '0.13.8'
+        working-directory: credit-distributor
+
+    - name: Check and test
+      working-directory: credit-distributor
+      run: |
+        uv sync --locked
+        uv run ruff check
+        uv run ruff format --check
+        uv run mypy src tests
+        uv run pytest
+
+  audit:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v10.3.3
+      with:
+        version: '0.13.8'
+        enable-cache: false
+
+    - name: Audit
+      working-directory: credit-distributor
+      run: |
+        uv export --frozen --no-dev --no-emit-project --no-hashes -o requirements.txt
+        uvx pip-audit==2.10.1 -r requirements.txt --no-deps --disable-pip -s osv

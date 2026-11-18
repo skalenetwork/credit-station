@@ -29,7 +29,6 @@
 # python
 
 .venv/
-uv.lock
 __pycache__/
 
 # SKALE files
@@ -38,3 +37,4 @@ data/
 state.json
 
 config.toml
+distributor_key
