@@ -6,18 +6,23 @@ on:
       - .github/workflows/credit-distributor.yml
       - contracts/**
       - credit-distributor/**
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Set up Node
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@v7
       with:
-        node-version: 24
+        node-version: 24.22.3
         cache: 'yarn'
 
     - name: Start Hardhat node
@@ -29,9 +34,10 @@ jobs:
           -d '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}' http://127.0.0.1:8547
 
     - name: Set up uv
-      uses: astral-sh/setup-uv@v10.2.0
+      uses: astral-sh/setup-uv@v10.3.3
       with:
-        version: '0.12.19'
+        version: '0.13.8'
+        working-directory: credit-distributor
 
     - name: Check and test
       working-directory: credit-distributor
@@ -41,3 +47,21 @@ jobs:
         uv run ruff format --check
         uv run mypy src tests
         uv run pytest
+
+  audit:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v10.3.3
+      with:
+        version: '0.13.8'
+        enable-cache: false
+
+    - name: Audit
+      working-directory: credit-distributor
+      run: |
+        uv export --frozen --no-dev --no-emit-project --no-hashes -o requirements.txt
+        uvx pip-audit==2.10.1 -r requirements.txt --no-deps --disable-pip -s osv

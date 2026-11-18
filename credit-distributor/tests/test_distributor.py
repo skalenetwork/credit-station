@@ -147,7 +147,7 @@ def test_cycle(
     parked = {payment: reason} if reason else {}
     paid = not parked
     fulfilled = [distributor.ledger.is_fulfilled(p) for p in (payment, foreign, later)]
-    assert logs == [f'ERROR {NAME}: parked payment {p:#x}: {r}' for p, r in parked.items()]
+    assert logs == [f'ERROR {NAME}: parked payment {p:#x}: {r!r}' for p, r in parked.items()]
     assert chain.observe() == (balance + Web3.to_wei(3 + credits * paid, 'ether'), nonce + 1 + paid)
     assert fulfilled == [paid, False, True]
     assert distributor.state.parked == parked

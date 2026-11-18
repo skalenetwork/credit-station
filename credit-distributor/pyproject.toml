@@ -2,16 +2,16 @@
 name = "credit-distributor"
 version = "0.1.0"
 requires-python = ">=3.14"
-dependencies = ["skale.py==7.14dev5", "skale.py-core==7.14dev5", "pydantic>=2.13,<3"]
+dependencies = ["skale.py==8.0dev3", "skale.py-core==8.0dev3", "pydantic==2.14.3"]
 
 [project.scripts]
 credit-distributor = "credit_distributor:main"
 
 [dependency-groups]
-dev = ["ruff==0.16.9", "mypy==2.3.1", "pytest==9.1.1"]
+dev = ["ruff==0.17.5", "mypy==2.4.1", "pytest==9.2.0"]
 
 [build-system]
-requires = ["uv_build>=0.12,<0.13"]
+requires = ["uv_build>=0.13,<0.14"]
 build-backend = "uv_build"
 
 [tool.ruff]
